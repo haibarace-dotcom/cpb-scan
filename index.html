@@ -3,7 +3,7 @@
 <head><script>window.__API="https://script.google.com/macros/s/AKfycbwwv_9NtkCBKp7UTrNNbFN-Lk0ibzPL8HalOjiSyflBh6WwgPUFjrFDtM5xEOCduGU4/exec";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>人工心肺コスト表（携帯）</title>
+<title>人工心肺コスト表 バーコード入力</title>
 <style>
 :root{
   --bg:#eef1f5; --card:#fff; --ink:#1d2733; --sub:#5b6878; --line:#d5dbe3;
@@ -1311,7 +1311,10 @@ document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('clic
 /* ================= boot ================= */
 /* ================= 携帯で読む ================= */
 var PRM=window.__P||{};
-if(API){const q=new URLSearchParams(location.search);PRM={m:'1',c:String(q.get('c')||'').replace(/[^0-9A-Za-z_]/g,'')}}
+// GitHub Pages では、携帯なら携帯用、PCならPC用の画面にする（?m=1 で携帯用を指定）
+if(API){const q=new URLSearchParams(location.search);
+  const phone=/iPhone|iPod|Android.+Mobile/i.test(navigator.userAgent)||(matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<600);
+  PRM={m:(q.get('m')==='1'||phone)?'1':'',c:String(q.get('c')||'').replace(/[^0-9A-Za-z_]/g,'')}}
 var MOBILE=SERVER&&PRM.m==='1';
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('部品を読み込めませんでした（ネット接続を確認）'));document.head.appendChild(s)})}
 const maskId=s=>{s=String(s||'');return s.length>3?'＊'.repeat(Math.min(4,s.length-3))+s.slice(-3):s};
@@ -1442,12 +1445,12 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&camStream)
 var webUrl='';
 $('#bPhone').addEventListener('click',async()=>{
   try{
-    const wu=await gs('webUrl');webUrl=wu.url;const mob=(wu.mobileUrl||'').trim();
+    const wu=await gs('webUrl');webUrl=wu.url;const mob=(wu.mobileUrl||(API?location.href.split(/[?#]/)[0]:'')).trim();
     // 携帯で開けるよう、空の症例でも先にサーバーへ作っておく
     clearTimeout(saveTimer);saveTimer=null;dirty=false;await saveSeq;
     const rec=makeRecord();const r=await gs('saveCase',{rec});putHist(r.rec||rec);lastSavedAt=Date.now();drawSaveSt();
     if(!window.QRCode)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
-    const url=mob?mob+(mob.includes('?')?'&':'?')+'c='+encodeURIComponent(C.hid):webUrl+'?m=1&c='+encodeURIComponent(C.hid);
+    const url=mob?mob+(mob.includes('?')?'&':'?')+'m=1&c='+encodeURIComponent(C.hid):webUrl+'?m=1&c='+encodeURIComponent(C.hid);
     $('#qrBox').innerHTML='';new QRCode($('#qrBox'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
     $('#qrCase').textContent=`${fmtYmd(C.date)}　ID ${maskId(C.pid)||'未入力'}　${C.op||''}`;
     $('#qrUrl').textContent=mob||webUrl+'?m=1';
