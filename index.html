@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><script>window.__API="https://script.google.com/macros/s/AKfycbwwv_9NtkCBKp7UTrNNbFN-Lk0ibzPL8HalOjiSyflBh6WwgPUFjrFDtM5xEOCduGU4/exec";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人工心肺コスト表（携帯）</title>
+<style>
+:root{
+  --bg:#eef1f5; --card:#fff; --ink:#1d2733; --sub:#5b6878; --line:#d5dbe3;
+  --navy:#1f3a5f; --accent:#2563eb; --ok:#15803d; --okbg:#e8f6ee; --warn:#b45309; --warnbg:#fff4e0;
+  --ng:#b91c1c; --ngbg:#fdecec; --hit:#fff7c2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"BIZ UDPGothic","BIZ UDゴシック","Yu Gothic UI","Meiryo",sans-serif;font-size:14px}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit}
+header.app{background:var(--navy);color:#fff;display:flex;align-items:center;gap:18px;padding:10px 18px;flex-wrap:wrap}
+header.app h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.03em}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+nav.tabs button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:5px 14px}
+nav.tabs button.on{background:#fff;color:var(--navy);font-weight:700}
+main{padding:16px;max-width:1500px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.card h2{font-size:14px;margin:0 0 10px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.ngb{color:var(--ng);border-color:#f0b4b4}
+.btn.sm{padding:3px 8px;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label.f{display:block;font-size:12px;color:var(--sub);margin:8px 0 3px}
+input.t,select.t,textarea.t{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:#fff}
+
+/* scan box */
+.scan{border:2px solid var(--line);border-radius:12px;padding:12px;background:#f8fafc;transition:.15s}
+.scan.ready{border-color:var(--ok);background:var(--okbg)}
+.scan .st{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:8px}
+.dot{width:12px;height:12px;border-radius:50%;background:#9aa5b1}
+.scan.ready .dot{background:var(--ok);box-shadow:0 0 0 4px rgba(21,128,61,.18)}
+#scanIn{width:100%;font-size:18px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:Consolas,monospace}
+.scan .hint{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}
+.flash{margin-top:10px;border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.55;display:none}
+.flash.on{display:block}.flash.ok{background:var(--okbg);color:#0f5a2c}.flash.warn{background:var(--warnbg);color:#7a3e00}.flash.ng{background:var(--ngbg);color:#8c1414}
+.flash b{font-size:14px}
+.flash .undo{float:right;margin-left:8px}
+
+/* log */
+.log{list-style:none;margin:0;padding:0;max-height:420px;overflow:auto}
+.log li{border-bottom:1px solid var(--line);padding:8px 2px;display:grid;grid-template-columns:1fr auto;gap:4px 8px}
+.log .nm{font-weight:700;font-size:13px}
+.log .meta{font-size:12px;color:var(--sub);font-family:Consolas,"BIZ UDPGothic",monospace}
+.log .meta .ng{color:var(--ng);font-weight:700}
+.log .meta .miss{color:var(--warn);font-weight:700}
+.empty{color:var(--sub);font-size:13px;padding:10px 2px}
+
+/* paper (screen + print) */
+.paperWrap{background:#cfd6df;border-radius:10px;padding:16px;overflow:auto}
+.paper{background:#fff;width:190mm;min-height:270mm;margin:0 auto;padding:7mm 6mm;box-shadow:0 2px 10px rgba(0,0,0,.15);color:#000;
+  font-family:"BIZ UDPGothic","MS PGothic","Yu Gothic",sans-serif}
+.ph{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2mm}
+.ph .ttl{font-size:17pt;font-weight:700;letter-spacing:.02em}
+.ph .ver{font-size:7pt}
+table.cost{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt}
+table.cost th,table.cost td{border:1px solid #000;padding:0 1.2mm;height:6.15mm;overflow:hidden;white-space:nowrap}
+table.cost th{background:#e4e4e4;font-weight:400;text-align:center}
+table.cost td.sec{background:#e4e4e4;text-align:center;font-size:8.5pt}
+table.cost td.mk{font-size:7.5pt}
+table.cost td.qty{text-align:center;font-weight:700;font-size:10.5pt}
+table.cost td.lot{font-family:"BIZ UDPGothic",sans-serif;font-size:8.5pt;font-weight:700}
+table.cost td.lot.s1{font-size:7pt}table.cost td.lot.s2{font-size:6pt;white-space:normal;line-height:1.05}
+table.cost td.rem{font-size:7.5pt}
+table.cost td .fit{display:inline-block;transform-origin:left center}
+table.cost tr.used td.nm,table.cost tr.used td.sp{font-weight:700}
+.pf{margin-top:7mm;font-size:10pt;display:grid;grid-template-columns:1.25fr 1.1fr 1fr;row-gap:4mm;column-gap:4mm}
+.pf div{border-bottom:1px solid #000;padding-bottom:.5mm;white-space:nowrap;overflow:hidden}
+.pf .rt{font-weight:700;border-bottom:1px solid #000}
+.pf .val{font-weight:700;font-family:"BIZ UDPGothic",sans-serif}
+/* screen-only affordances on paper */
+@media screen{
+  table.cost tr.item:hover td{background:#f2f6ff}
+  table.cost tr.used td{background:var(--hit)}
+  table.cost tr.item td.rem{cursor:text}
+  table.cost tr.item td.qty,table.cost tr.item td.lot{cursor:pointer}
+  table.cost tr.flashrow td{animation:fl 1.2s}
+  @keyframes fl{0%{background:#7dd3a0}100%{background:var(--hit)}}
+}
+
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:12px;width:min(640px,100%);max-height:90vh;overflow:auto;padding:18px}
+.modal h3{margin:0 0 6px;font-size:16px;color:var(--navy)}
+.modal .code{font-family:Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:6px 8px;font-size:13px;word-break:break-all}
+.pick{list-style:none;margin:8px 0;padding:0;max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.pick li{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.pick li:hover,.pick li.sel{background:#eaf1ff}
+.pick li small{color:var(--sub)}
+.pick .secname{background:#f1f5f9;color:var(--sub);font-size:12px;cursor:default;padding:4px 10px}
+
+/* master / history tables */
+table.m{width:100%;border-collapse:collapse;font-size:13px}
+table.m th,table.m td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+table.m th{background:#f1f5f9;font-weight:700;position:sticky;top:0}
+table.m input{width:100%;border:1px solid transparent;border-radius:5px;padding:4px 6px;background:transparent}
+table.m input:hover,table.m input:focus{border-color:var(--line);background:#fff}
+table.m tr.blank td{color:var(--sub);background:#fafafa}
+table.m tr.sect td{background:#e8edf4;font-weight:700;color:var(--navy)}
+.help{line-height:1.85;max-width:900px}
+.help h3{color:var(--navy);margin:18px 0 4px;font-size:15px}
+.help code{background:#f1f5f9;padding:1px 5px;border-radius:4px}
+.mobonly{display:none}
+body.mobile .mobonly{display:block}
+body.mobile nav.tabs,body.mobile .paperWrap,body.mobile #bMail,body.mobile #bPrint,body.mobile .pconly{display:none!important}
+body.mobile main{padding:10px}
+body.mobile .grid{display:block}
+body.mobile header.app h1{font-size:15px}
+body.mobile #scanIn{font-size:16px}
+body.mobile .scan .hint{display:none}
+.bigbtn{font-size:17px;padding:14px 12px;border-radius:12px;width:100%;font-weight:700}
+#camVid{width:100%;max-height:52vh;object-fit:cover;border-radius:10px;background:#000;display:none;margin-top:8px}
+.camwrap{position:relative}
+.camwrap .aim{position:absolute;left:8%;right:8%;top:38%;height:24%;border:3px solid rgba(255,255,255,.85);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.25);pointer-events:none;display:none}
+#mobCaseBox{font-size:14px;line-height:1.7}
+#mobCaseBox b{font-size:16px}
+.pick .cs{display:block}
+#qrBox{display:flex;justify-content:center;margin:10px 0}
+.savest{margin-top:10px;font-size:12.5px;min-height:18px}
+.savest .ok{color:var(--ok)}.savest .dirty{color:var(--warn)}.savest .ng{color:var(--ng);font-weight:700}
+.stb{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;color:#fff;white-space:nowrap}
+.stb.draft{background:#c27c0e}.stb.saved{background:#2563eb}.stb.sent{background:#15803d}
+table.m tr.det td{background:#f8fafc;font-size:12.5px;line-height:1.7}
+table.m tr.det ul{margin:4px 0;padding-left:18px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:8px 0 10px}
+.filters label{font-size:12px;color:var(--sub);display:block;margin-bottom:2px}
+.filters .t{padding:5px 8px}
+.tag{display:inline-block;font-size:11px;border-radius:999px;padding:1px 8px;background:#e8edf4;color:var(--navy)}
+
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  body{background:#fff}
+  header.app,.noprint,.page:not(#pgInput),.mask{display:none!important}
+  main{padding:0;max-width:none}
+  #pgInput{display:block!important}
+  .grid{display:block}
+  .grid>.left{display:none}
+  .paperWrap{background:none;padding:0}
+  .paper{box-shadow:none;margin:0;width:auto;min-height:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header class="app">
+  <h1>人工心肺コスト表　バーコード入力</h1>
+  <nav class="tabs">
+    <button data-pg="pgInput" class="on">入力</button>
+    <button data-pg="pgHist">症例一覧</button>
+    <button data-pg="pgMaster">品目マスタ</button>
+    <button data-pg="pgHelp">使い方</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ 入力 ============ -->
+<section class="page on" id="pgInput">
+ <div class="grid">
+  <div class="left noprint">
+   <div class="card">
+    <div class="mobonly" id="mobCaseBox" style="margin-bottom:10px"></div>
+    <div class="mobonly" style="margin-bottom:10px">
+     <button class="btn pri bigbtn" id="camStart">📷 カメラで読む</button>
+     <div class="camwrap"><video id="camVid" playsinline muted autoplay></video><div class="aim" id="camAim"></div></div>
+     <div class="row" style="margin-top:8px">
+      <button class="btn" id="camStop" style="display:none;flex:1">カメラを止める</button>
+      <button class="btn" id="camPhoto" style="flex:1">📸 写真で読む</button>
+     </div>
+     <input type="file" accept="image/*" capture="environment" id="camFile" hidden>
+     <div id="camMsg" style="font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.6">バーコードを枠の中に写すと自動で読み取ります。読めないときは「写真で読む」で、バーコードに近づけて撮ってください。</div>
+    </div>
+    <div class="scan" id="scanBox">
+     <div class="st"><span class="dot"></span><span id="scanSt">クリックするとスキャン待機になります</span></div>
+     <input id="scanIn" autocomplete="off" spellcheck="false" placeholder="ここでバーコードを読む">
+     <div class="hint">外袋・箱のラベルのGS1バーコード（(01)…(17)…(10)…）を読むと、該当行に<b>使用数</b>と<b>製造番号</b>が入ります。
+      規格（例 <code>SUN-18</code>）を手で打って Enter でも追加できます。</div>
+     <div class="row" style="margin-top:8px;font-size:12px;color:var(--sub);gap:6px">読み取り音
+      <select class="t" id="sndLv" style="width:auto;padding:3px 6px;font-size:12px"><option value="high">大</option><option value="mid">中</option><option value="low">小</option><option value="off">鳴らさない</option></select>
+      <button class="btn sm" id="sndTest">音のテスト</button>
+      <button class="btn sm serveronly pconly" id="bPhone" style="display:none">📱 携帯で読む</button></div>
+     <div class="flash" id="flash"></div>
+    </div>
+   </div>
+
+   <div class="card">
+    <h2>症例情報</h2>
+    <div class="row" style="gap:10px">
+     <div style="flex:1;min-width:140px"><label class="f">手術日</label><input class="t" type="date" id="cDate"></div>
+     <div style="flex:1;min-width:140px"><label class="f">患者様ID</label><input class="t" id="cPid" autocomplete="off"></div>
+    </div>
+    <label class="f">術式</label><input class="t" id="cOp" autocomplete="off" list="opList">
+    <datalist id="opList"></datalist>
+    <label class="f">所属</label><input class="t" id="cDept" autocomplete="off">
+    <div class="row" style="margin-top:12px">
+     <button class="btn pri" id="bMail">アストへメール送信</button>
+     <button class="btn" id="bPrint">印刷する</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+     <button class="btn" id="bSaveNow" style="font-weight:700">保存</button>
+     <button class="btn" id="bSave">保存して次の症例へ</button>
+     <button class="btn ngb" id="bClear">この症例を消す</button>
+    </div>
+    <div class="savest" id="saveSt"></div>
+   </div>
+
+   <div class="card">
+    <h2>読み取り記録 <span class="tag" id="logCount">0件</span></h2>
+    <ul class="log" id="log"></ul>
+   </div>
+  </div>
+
+  <div class="paperWrap">
+   <div class="paper" id="paper"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ============ 履歴 ============ -->
+<section class="page" id="pgHist">
+ <div class="card">
+  <div class="row" style="justify-content:space-between">
+   <h2 style="margin:0">症例一覧 <span class="tag" id="histCount"></span></h2>
+   <div class="row"><button class="btn" id="bHistReload">最新にする</button><button class="btn" id="bHistCsv">表示中をCSVで書き出し（1行＝1本）</button></div>
+  </div>
+  <p style="color:var(--sub);font-size:12px;margin:6px 0 0">入力中の症例も自動で保存されてここに出ます<span class="localonly">（このパソコンのブラウザ内だけに保存）</span><span class="serveronly" style="display:none">（全PC共通）</span>。行をクリックすると使用物品と製造番号が見られます。</p>
+  <div class="filters">
+   <div><label>期間（手術日）</label><select class="t" id="hPeriod"><option value="all">全期間</option><option value="m0">今月</option><option value="m1">先月</option><option value="y0">今年</option><option value="custom">日付を指定</option></select></div>
+   <div id="hRange" style="display:none"><label>から〜まで</label><input class="t" type="date" id="hFrom"> 〜 <input class="t" type="date" id="hTo"></div>
+   <div><label>状態</label><select class="t" id="hSt"><option value="">すべて</option><option value="draft">入力中</option><option value="saved">保存済（未送信）</option><option value="sent">送信済</option></select></div>
+   <div style="flex:1;min-width:200px"><label>検索（患者ID・術式・品名・規格・製造番号）</label><input class="t" id="hQ" autocomplete="off" style="width:100%"></div>
+  </div>
+  <div id="hSum" style="font-size:13px;margin-bottom:6px"></div>
+  <table class="m"><thead><tr><th style="width:100px">手術日</th><th style="width:110px">患者様ID</th><th style="width:150px">術式</th><th>使用物品</th><th style="width:150px">状態</th><th style="width:150px"></th></tr></thead><tbody id="histBody"></tbody></table>
+ </div>
+</section>
+
+<!-- ============ マスタ ============ -->
+<section class="page" id="pgMaster">
+ <div class="card">
+  <h2>メール送信の設定 <span class="tag" id="mailState">未設定</span></h2>
+  <p style="color:var(--sub);font-size:12px;margin:0 0 8px;line-height:1.7">
+   haibara.ce@gmail.com の Gmail から、アストへPDF付きで送ります。宛先は Apps Script 側（Code.gs）で決めます。<br>
+   <span class="localonly">ここの設定はこのパソコンのブラウザにだけ保存されます（マスタの書き出しには含まれません）。</span>
+   <span class="serveronly" style="display:none">宛名・署名・患者IDの設定は全PC共通です。</span></p>
+  <div class="row localonly" style="gap:14px">
+   <div style="flex:2;min-width:280px"><label class="f">Apps Script の URL（…/exec）</label><input class="t" id="mUrl" autocomplete="off" placeholder="https://script.google.com/macros/s/……/exec"></div>
+   <div style="flex:1;min-width:200px"><label class="f">合言葉</label><input class="t" id="mTok" type="password" autocomplete="off"></div>
+  </div>
+  <div class="row" style="gap:14px">
+   <div style="flex:1;min-width:220px"><label class="f">本文の宛名</label><input class="t" id="mDear"></div>
+   <div style="flex:1;min-width:220px"><label class="f">本文の署名</label><input class="t" id="mSign"></div>
+  </div>
+  <label style="display:flex;gap:6px;align-items:center;margin-top:10px;font-size:13px"><input type="checkbox" id="mPid"> メール（件名・本文・PDF）に患者様IDを載せる</label>
+  <div class="row" style="margin-top:12px">
+   <button class="btn" id="mInfo">接続を確かめる</button>
+   <button class="btn" id="mTest">テスト送信（haibara.ce 自分宛て）</button>
+   <span id="mMsg" style="font-size:13px"></span>
+  </div>
+ </div>
+ <div class="card">
+  <div class="row" style="justify-content:space-between">
+   <h2 style="margin:0">品目マスタ</h2>
+   <div class="row localonly">
+    <button class="btn" id="bExport">マスタを書き出し（他のPCへ）</button>
+    <label class="btn" style="margin:0">マスタを読み込み<input type="file" id="fImport" accept=".json" hidden></label>
+   </div>
+  </div>
+  <p style="color:var(--sub);font-size:12px;margin:6px 0 10px;line-height:1.7">
+   「バーコード（GTIN）」は14桁の商品コードです。知らないバーコードを読んだときに品目を選ぶと、ここに自動で追記されます（1品目に複数登録可・カンマ区切り）。<br>
+   品名が空の行は、紙の表と同じ「空き行」として印刷されます。</p>
+  <div class="row" style="gap:14px;margin-bottom:10px">
+   <div style="flex:1;min-width:220px"><label class="f">表の右上（版）</label><input class="t" id="sVer"></div>
+   <div style="flex:1;min-width:220px"><label class="f">担当（右下）</label><input class="t" id="sRep"></div>
+   <div style="flex:1;min-width:220px"><label class="f">FAX（右下）</label><input class="t" id="sFax"></div>
+  </div>
+  <div style="max-height:62vh;overflow:auto">
+  <table class="m"><thead><tr><th style="width:34%">品名</th><th style="width:14%">規格</th><th style="width:11%">メーカー</th><th>バーコード（GTIN）</th><th style="width:150px"></th></tr></thead><tbody id="mBody"></tbody></table>
+  </div>
+  <div class="row localonly" style="margin-top:12px">
+   <button class="btn ngb" id="bReset">マスタを初期状態に戻す</button>
+  </div>
+ </div>
+ <div class="card serveronly" style="display:none">
+  <h2>管理</h2>
+  <p style="color:var(--sub);font-size:12px;margin:0 0 8px;line-height:1.7">品目マスタ・設定・症例履歴は haibara.ce の Googleドライブ「【削除禁止】人工心肺コスト表_データ保管」に保存され、6時間ごとに自動でバックアップされます。</p>
+  <div class="row">
+   <input class="t" id="newPass" type="password" placeholder="新しいパスワード（6文字以上）" style="max-width:260px" autocomplete="new-password">
+   <button class="btn" id="bPass">パスワードを変更（全PC共通）</button>
+   <button class="btn" id="bSheet">データのスプレッドシートを開く</button>
+  </div>
+  <label class="f" style="margin-top:12px">携帯用の読み取りページのURL（GitHub Pages など。PCの「📱 携帯で読む」のQRコードがここを指します）</label>
+  <div class="row"><input class="t" id="sMobUrl" placeholder="https://○○.github.io/cpb-scan/" style="max-width:480px" autocomplete="off"></div>
+ </div>
+</section>
+
+<!-- ============ 使い方 ============ -->
+<section class="page" id="pgHelp">
+ <div class="card help">
+  <h3>ふだんの流れ</h3>
+  1. 「入力」タブで手術日・患者様ID・術式を入れる<br>
+  2. 使った物品の外袋（箱）のバーコードを、USBバーコードリーダーで順に読む → 右の表の<b>使用数</b>と<b>製造番号</b>が埋まる<br>
+  3. 「印刷する」→ A4で出力してFAX／提出<br>
+  4. 入力は数秒ごとに自動で保存されます（「保存」ボタンですぐ保存もできます）。終わったら「保存して次の症例へ」<br>
+  5. 過去の症例は「症例一覧」タブ。期間・状態・キーワードで絞り込み、行をクリックすると使用物品と製造番号が見られます
+  <h3>携帯で読む（GAS版のみ）</h3>
+  ・PCの「📱 携帯で読む」→ 出てきたQRコードを携帯のカメラで読む → その症例が携帯で開きます（初回だけパスワード）。<br>
+  ・携帯では「📷 カメラで読む」でバーコードを枠に写すと、自動で読み取って「ピッ」と鳴ります。カメラが使えない機種は「📸 写真で読む」。<br>
+  ・携帯で読んだ分は約10秒でPCの画面にも入ります。PCと携帯で同時に読んでも、両方とも残ります。<br>
+  ・同じロットを2本使ったときは、一度カメラを外してからもう一度写すと2本目として数えます。<br>
+  ・携帯の画面では患者様IDは下3桁だけ表示します。院内の個人端末の使用ルールに従ってください。
+  <h3>アストへメールで送る</h3>
+  ・「アストへメール送信」→ 宛先・件名・本文を確認 →「送信する」。haibara.ce@gmail.com から、表のPDFを添付して送られます。<br>
+  ・送信できたら自動で履歴に保存され、次の症例を読める状態になります。履歴の「メール」欄に送信日時が残ります。<br>
+  ・同じ症例をもう一度送ると「再送です」と確認が出ます。ボタンの連打や通信のやり直しで二重に届くことはありません。<br>
+  ・送れなかったときは入力が残ったままになります。急ぐときは印刷してFAXしてください。<br>
+  ・最初の設定は同じフォルダの「GAS版/導入手順.md」を見てください。
+  <h3>読み取りのルール</h3>
+  ・1回読む＝1本。同じロットを2本使ったら2回読む（表には <code>261034×2</code> のように出ます）。<br>
+  ・読みすぎたら、読んだ直後の緑の帯の［取り消す］か、左の読み取り記録の［削除］。<br>
+  ・<b>初めてのバーコード</b>は「どの品目ですか？」と聞かれるので、選ぶと次回からは自動で入ります。<br>
+  ・エドワーズのように「商品コード」と「ロット・期限」が別のバーコードに分かれているラベルは、2本を続けて読めばOK（2本目が直前の品目のロットとして入ります）。<br>
+  ・使用期限が手術日より前のものは<b>赤字で警告</b>します（表には入ります）。<br>
+  ・表の使用数・製造番号のマスをクリックすると、ロットを手入力して1本追加できます。備考のマスはクリックで書き込めます。
+  <h3>うまく読めないとき</h3>
+  ・入力欄に日本語（全角）が入る → キーボードの「半角/全角」で英数字入力に切り替える。<br>
+  ・枠が緑（スキャン待機中）でないと読めません。灰色なら入力欄をクリック。<br>
+  ・バーコードが傷んでいる → 下に印字された数字（例 <code>(01)04806019615473(17)290131(10)261030</code>）をそのまま打って Enter でも同じように入ります。
+  <h3>データの置き場所</h3>
+  すべてこのパソコンのブラウザ内（localStorage）に保存されます。外部には送信しません。ブラウザの閲覧データを消すと消えるので、
+  品目マスタは時々「マスタを書き出し」で保存しておくと安心です。別のPCで使うときも、書き出したファイルを読み込めば覚えたバーコードを引き継げます。
+ </div>
+</section>
+</main>
+
+<!-- unknown barcode modal -->
+<div class="mask" id="mUnknown"><div class="modal">
+ <h3>このバーコードはどの品目ですか？</h3>
+ <div class="code" id="uCode"></div>
+ <div style="font-size:12px;color:var(--sub);margin:6px 0">選ぶと、このバーコードを覚えて次回から自動で入ります。</div>
+ <input class="t" id="uSearch" placeholder="品名・規格・メーカーで絞り込み（例 SUN、テルモ）" autocomplete="off">
+ <ul class="pick" id="uList"></ul>
+ <details id="uNewBox"><summary style="cursor:pointer;color:var(--accent)">表にない品目として新しく登録する</summary>
+  <div class="row" style="gap:8px;margin-top:6px">
+   <div style="flex:2;min-width:200px"><label class="f">品名</label><input class="t" id="nName"></div>
+   <div style="flex:1;min-width:120px"><label class="f">規格</label><input class="t" id="nSpec"></div>
+   <div style="flex:1;min-width:120px"><label class="f">メーカー</label><input class="t" id="nMk"></div>
+   <div style="flex:1;min-width:160px"><label class="f">区分</label><select class="t" id="nSec"></select></div>
+  </div>
+  <div style="margin-top:8px"><button class="btn pri" id="nAdd">登録して入力する</button></div>
+ </details>
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="uCancel">今回は入れない</button></div>
+</div></div>
+
+<!-- manual add modal -->
+<div class="mask" id="mManual"><div class="modal" style="width:min(460px,100%)">
+ <h3 id="mmTitle">手入力で追加</h3>
+ <div id="mmItem" style="font-weight:700;margin-bottom:6px"></div>
+ <label class="f">製造番号（ロット）</label><input class="t" id="mmLot" autocomplete="off">
+ <label class="f">使用期限（任意）</label><input class="t" type="date" id="mmExp">
+ <label class="f">本数</label><input class="t" type="number" id="mmQty" min="1" value="1" style="width:100px">
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="mmCancel">やめる</button><button class="btn pri" id="mmOk">追加</button></div>
+</div></div>
+
+<!-- mail confirm modal -->
+<div class="mask" id="mMail"><div class="modal">
+ <h3>この内容でアストへ送信します</h3>
+ <div style="font-size:13px;line-height:1.8">
+  <div>宛先：<b id="mmTo">（確認中…）</b></div>
+  <div>件名：<b id="mmSub"></b></div>
+  <div>添付：<span id="mmFile"></span></div>
+ </div>
+ <div id="mmWarn" class="flash warn" style="margin:8px 0"></div>
+ <label class="f">本文</label>
+ <textarea class="t" id="mmBody" rows="12" style="font-size:13px;line-height:1.6"></textarea>
+ <div class="row" style="justify-content:flex-end;margin-top:12px">
+  <button class="btn" id="mmCancel2">やめる</button>
+  <button class="btn pri" id="mmSend">送信する</button>
+ </div>
+</div></div>
+
+<!-- login modal（サーバー版のみ） -->
+<div class="mask" id="mLogin"><div class="modal" style="width:min(420px,100%)">
+ <h3>人工心肺コスト表</h3>
+ <p style="font-size:13px;color:var(--sub);margin:4px 0 10px">臨床工学科のパスワードを入れてください（このPCでは次回から入力不要）。</p>
+ <input class="t" id="lgPass" type="password" autocomplete="off">
+ <div id="lgMsg" style="font-size:13px;color:var(--ng);min-height:20px;margin-top:6px"></div>
+ <div class="row" style="justify-content:flex-end"><button class="btn pri" id="lgOk">開く</button></div>
+</div></div>
+
+<!-- 携帯で読む（PC側：QRコード） -->
+<div class="mask" id="mQr"><div class="modal" style="width:min(460px,100%);text-align:center">
+ <h3>携帯でこの症例を読む</h3>
+ <p style="font-size:13px;color:var(--sub);margin:4px 0">携帯のカメラでこのQRコードを読むと、この症例が携帯で開きます。<br>携帯で読んだ物品は、約10秒でこの画面にも入ります。</p>
+ <div id="qrBox"></div>
+ <div id="qrCase" style="font-size:13px;font-weight:700"></div>
+ <div id="qrNote" class="flash warn on" style="text-align:left;font-size:12px;margin-top:8px">携帯用ページのURLが未登録なので、Googleの画面を開きます（iPhoneなどではカメラが使えず「写真で読む」になります）。<br>「品目マスタ」→「管理」で携帯用ページのURLを登録してください。</div>
+ <details style="text-align:left;margin-top:10px;font-size:12.5px"><summary style="cursor:pointer;color:var(--accent)">携帯用の画面をブックマークしたいとき</summary>
+  <div style="margin-top:6px">次のURLを携帯で開いてブックマークしてください（症例は携帯の画面で選びます）。</div>
+  <div class="code" id="qrUrl" style="margin-top:4px;word-break:break-all;font-family:Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:6px 8px"></div>
+ </details>
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="qrClose">閉じる</button></div>
+</div></div>
+
+<!-- 携帯：症例を選ぶ -->
+<div class="mask" id="mCase"><div class="modal">
+ <h3>どの症例に入れますか？</h3>
+ <ul class="pick" id="csList"></ul>
+ <div class="row" style="margin-top:6px"><button class="btn pri" id="csNew" style="flex:1">＋ 新しい症例を始める</button></div>
+ <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="csClose">閉じる</button></div>
+</div></div>
+
+<!-- remarks modal -->
+<div class="mask" id="mRem"><div class="modal" style="width:min(460px,100%)">
+ <h3>備考</h3>
+ <div id="rmItem" style="font-weight:700;margin-bottom:6px"></div>
+ <input class="t" id="rmText" autocomplete="off">
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="rmCancel">やめる</button><button class="btn pri" id="rmOk">決定</button></div>
+</div></div>
+
+<script>
+'use strict';
+/* =========================================================
+   初期マスタ（2025/11/16現在Ver.1 の紙のコスト表から起こしたもの）
+   gtin は実物のラベル写真で確認できたものだけ入れてある
+   ========================================================= */
+const SECTIONS=[
+  {id:'circ',name:'人工心肺回路関連'},
+  {id:'cann',name:'送脱血カニューレ・ベント関連'},
+  {id:'pleg',name:'プレジャー関連'}
+];
+const SEED=[
+ ['circ','キャピオックスカスタムパック（FX25プレコネクト）','CX-XRX58411','テルモ','54987892029214'],
+ ['circ','キャピオックスカスタムパック（FX15プレコネクト）','CX-XRY58411','テルモ'],
+ ['circ','','',''],
+ ['circ','榛原総合病院　インスパイアプレコネ回路','JK-SMKL23502','LivaNova','54987494318600'],
+ ['circ','キャピオックスカスタムパック（心筋保護回路）','CX-BPD58401','テルモ','54987892041698'],
+ ['circ','CDIシャントセンサー','CV-510H1','テルモ','04987350157195'],
+ ['circ','レボリューションポンプ　フィジオ','050300700J','LivaNova','08033178112475'],
+ ['circ','','',''],
+ ['circ','キャピオックス静脈リザーバー','CX-RR40V','テルモ'],
+ ['circ','ヘモコンセントレーター　血液濃縮器','BHC-110','平和物産','14987458518826,04987458518829'],
+ ['circ','ヘモコン用回路','MQ-HE','平和物産'],
+ ['circ','脳分離回路','HB-NB','平和物産'],
+ ['circ','ウォッシュセット　自己血回収キット','TX/125(04355J)','LivaNova'],
+ ['cann','イージーグライド送血カニューレ（7mm・心尖部）','EZS21A','エドワーズ','00690103172096'],
+ ['cann','イージーグライド送血カニューレ（7mm・上行用）','EZC21A','エドワーズ','00690103174182'],
+ ['cann','メラカニューレ（FA送血用）※生体適合性あり','PCKC-A2-16','泉工医科工業'],
+ ['cann','メラカニューレ（FA送血用）※生体適合性あり','PCKC-A2-20','泉工医科工業'],
+ ['cann','メラカニューレ（FA脱血用）※生体適合性あり','PCKC-V2-24','泉工医科工業'],
+ ['cann','','',''],
+ ['cann','脱血カニューレ（24Fr.・ストレート）','66124','メドトロニック','00673978183947'],
+ ['cann','脱血カニューレ（30Fr.・ストレート）','66130','メドトロニック','00673978183992'],
+ ['cann','脱血カニューレ（32Fr.・ストレート）','66132','メドトロニック'],
+ ['cann','脱血カニューレ（24Fr.・ﾗｲﾄｱﾝｸﾞﾙ）','67524','メドトロニック'],
+ ['cann','脱血カニューレ（26Fr.・ﾗｲﾄｱﾝｸﾞﾙ）','67526','メドトロニック'],
+ ['cann','脱血カニューレ（28Fr.・ﾗｲﾄｱﾝｸﾞﾙ）','67528','メドトロニック'],
+ ['cann','ツーステージ脱血カニューレ（28／38Fr.）','INKN-D2-2838','泉工医科工業','04806019614735'],
+ ['cann','ツーステージ脱血カニューレ（32／40Fr.）','91240','メドトロニック'],
+ ['cann','脳分離用　SPスタットカテーテル（Ⅰ型／10Fr.）','0183710','富士システムズ'],
+ ['cann','脳分離用　SPスタットカテーテル（Ⅰ型／14Fr.）','0183714','富士システムズ'],
+ ['cann','脳分離用　SPスタットカテーテル（Ⅰ型／16Fr.）','0183716','富士システムズ','14544050123423'],
+ ['cann','','',''],
+ ['cann','フレックスメイトベントカニューレ（18Fr.）','VCKN-18','泉工医科工業','04806019615411'],
+ ['cann','心腔内フレキシブルサッカー（ドボン）','SUN-18','泉工医科工業','04806019615473'],
+ ['pleg','アンテフレックス（12G）','ANKN-12-V-ZA','泉工医科工業','04806019615220'],
+ ['pleg','レトロプレジャーカニューレ（14Fr.・32cm・マニュアルインフレート）','RC2014MIBB','エドワーズ','00690103034479'],
+];
+function seedMaster(){
+  return {
+    items:SEED.map((r,i)=>({id:'s'+(i+1),sec:r[0],name:r[1],spec:r[2],maker:r[3],gtins:r[4]?r[4].split(','):[]})),
+    ver:'2025/11/16現在Ver.1', rep:'担当:株式会社アスト　赤﨑/安川', fax:'FAX:0493-35-1860', dept:'心臓血管外科', nextId:1, seedRev:2
+  };
+}
+
+/* ================= storage ================= */
+const K_MASTER='cpbcost_master_v1', K_CASE='cpbcost_case_v1', K_HIST='cpbcost_hist_v1';
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast('ng','保存できませんでした（ブラウザの保存領域が使えません）')}}
+/* Apps Script（ウェブアプリ）の中で開かれたときはサーバー版：マスタ・設定・履歴はスプレッドシートで全PC共有。
+   ファイルを直接開いたときは今までどおり、このPCのブラウザ内だけに保存する */
+// 携帯用ページ（GitHub Pages など、Googleの枠の外）では window.__API に Apps Script の URL が入っていて、直接通信する
+const API=window.__API||'';
+const SERVER=!!API||!!(typeof google!=='undefined'&&google.script&&google.script.run);
+let PASS=load('cpbcost_pass','');
+function gs(action,payload){
+  if(API){
+    return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({pass:PASS,action,payload:payload||{}})})
+      .then(r=>r.json(),()=>{throw new Error('サーバーに繋がりませんでした（ネット接続を確認）')})
+      .then(r=>{if(r&&r.ok===false){const e=new Error(r.error||'エラー');e.auth=!!r.auth;throw e}return r});
+  }
+  return new Promise((res,rej)=>google.script.run
+    .withSuccessHandler(r=>{if(r&&r.ok===false){const e=new Error(r.error||'エラー');e.auth=!!r.auth;rej(e)}else res(r)})
+    .withFailureHandler(e=>rej(new Error('サーバーに繋がりませんでした：'+((e&&e.message)||e))))
+    .api(PASS,action,payload||{}));
+}
+let M=SERVER?{items:[],ver:'',rep:'',fax:'',dept:'',rev:0,mail:{dear:'',sign:'',pid:true}}:(load(K_MASTER,null)||seedMaster());
+// 初期マスタに後から足したバーコードを、保存済みのマスタにも反映する（手で消したものは戻さない）
+const SEED_REV=2;
+if(!SERVER&&(M.seedRev||1)<SEED_REV){
+  const seed=seedMaster();
+  for(const s of seed.items){
+    if(!s.spec)continue;
+    const key=v=>String(v||'').toUpperCase().replace(/[\s\-‐－ー_]/g,'');
+    const it=M.items.find(x=>x.spec&&key(x.spec)===key(s.spec));if(!it)continue;
+    for(const g of s.gtins){if(!M.items.some(x=>x.gtins.includes(g)))it.gtins.push(g)}
+  }
+  M.seedRev=SEED_REV;saveMaster();
+}
+let C=load(K_CASE,null)||newCase();
+let H=SERVER?[]:load(K_HIST,[]);
+function newHid(){return 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function newCase(){return {hid:newHid(),status:'draft',date:todayStr(),pid:'',op:'',dept:null,entries:[],rem:{}}}
+function caseHasContent(c){return !!(c&&(c.entries.length||c.pid||c.op))}
+let pushing=Promise.resolve();
+function saveMaster(){
+  if(!SERVER){save(K_MASTER,M);return}
+  // 品目の編集・並べ替え・削除・表示設定はマスタ全体を送る。他のPCが先に変えていたら上書きせず最新に合わせる
+  const snap=JSON.parse(JSON.stringify(M));
+  pushing=pushing.then(()=>gs('saveMaster',{rev:M.rev,items:snap.items,ver:snap.ver,rep:snap.rep,fax:snap.fax,dept:snap.dept,mail:snap.mail,mobileUrl:snap.mobileUrl}))
+    .then(r=>{setMaster(r.master);if(r.conflict)toast('warn','他のPCで品目マスタが変更されていたため、最新の内容を読み込みました。<br>直前の変更は保存されていないので、もう一度やり直してください。')})
+    .catch(err=>toast('ng','品目マスタを保存できませんでした：'+esc(err.message)));
+}
+function setMaster(m){M=m;render();drawMaster();drawMailForm();const u=document.getElementById('sMobUrl');if(u&&document.activeElement!==u)u.value=M.mobileUrl||''}
+/* 入力中の症例は、変更のたびに数秒後、自動で保存する（サーバー版はスプレッドシート、ファイル版はこのPCの症例一覧） */
+let dirty=false,saveTimer=null,saveSeq=Promise.resolve(),saving=false,lastSavedAt=0,saveErr='';
+function saveCase(){
+  save(K_CASE,C);
+  if(!caseHasContent(C)){dirty=false;drawSaveSt();return}
+  dirty=true;drawSaveSt();
+  clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,SERVER?2000:300);
+}
+function saveLocalOnly(){save(K_CASE,C);dirty=false;clearTimeout(saveTimer);saveTimer=null;drawSaveSt()}
+function flushSave(){
+  clearTimeout(saveTimer);saveTimer=null;
+  if(!dirty||!caseHasContent(C))return saveSeq;
+  const rec=makeRecord();dirty=false;saving=true;drawSaveSt();
+  saveSeq=saveSeq.then(()=>SERVER?gs('saveCase',{rec}):null)
+    .then(r=>{const st=(r&&r.rec)||rec;putHist(st);saveHist();applyRemote(st,true);if(C.hid===st.hid&&st.sentAt&&!C.sentAt){C.sentAt=st.sentAt;C.sentTo=st.sentTo;C.status='sent';save(K_CASE,C)}
+      lastSavedAt=Date.now();saveErr='';saving=false;drawSaveSt();drawHist()})
+    .catch(err=>{dirty=true;saving=false;saveErr=err.message;drawSaveSt()});
+  return saveSeq;
+}
+/** サーバーにある同じ症例の内容から、他の端末（携帯・別のPC）で読んだ分を取り込む。追加した本数を返す */
+function applyRemote(rec,quiet){
+  if(!rec||rec.hid!==C.hid)return 0;
+  const del=new Set([...(C.deleted||[]),...(rec.deleted||[])]);
+  const have=new Set(C.entries.map(e=>e.id));
+  const add=(rec.entries||[]).filter(e=>!have.has(e.id)&&!del.has(e.id));
+  const before=C.entries.length;
+  C.entries=C.entries.filter(e=>!del.has(e.id)).concat(add).sort((a,b)=>(a.at||0)-(b.at||0));
+  C.deleted=[...del];
+  const removed=before+add.length-C.entries.length;
+  if(!dirty&&!quiet)['date','pid','op','dept','rem','status','sentAt','sentTo'].forEach(k=>{if(rec[k]!==undefined)C[k]=rec[k]});
+  if(add.length||removed||!quiet){save(K_CASE,C);render();drawSaveSt()}
+  if(add.length){add.forEach(e=>flashRow(e.item));toast('ok',`<b>別の端末で読んだ ${add.length} 本</b>を取り込みました。`);beep('ok')}
+  return add.length;
+}
+function putHist(rec){const i=H.findIndex(x=>x.hid===rec.hid);if(i>=0)H[i]=rec;else H.unshift(rec)}
+function drawSaveSt(){
+  const el=document.getElementById('saveSt');if(!el)return;
+  const lab={draft:'入力中',saved:'保存済',sent:'送信済'}[stOf(C)];
+  let h='';
+  if(saveErr)h=`<span class="ng">⚠ 保存できていません：${esc(saveErr)}</span><br>ネット接続を確認して「保存」を押してください。`;
+  else if(saving)h='保存中…';
+  else if(dirty)h='<span class="dirty">● 未保存の変更があります（数秒後に自動で保存）</span>';
+  else if(caseHasContent(C)&&H.some(x=>x.hid===C.hid))h=`<span class="ok">✓ 保存済み</span>${lastSavedAt?' '+new Date(lastSavedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):''}（症例一覧：${lab}）`;
+  el.innerHTML=h;
+  const bc=document.getElementById('bClear');
+  if(bc)bc.textContent=(stOf(C)==='draft')?'この症例を消す':'閉じる（一覧に残る）';
+}
+function stOf(h){return h.sentAt?'sent':(h.status||'saved')}
+window.addEventListener('beforeunload',e=>{
+  if(dirty||saving||saveTimer||saveErr){if(dirty)flushSave();e.preventDefault();e.returnValue='';}
+});
+function saveHist(){if(!SERVER)save(K_HIST,H)}
+
+/* ================= utils ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function z2h(s){return s.replace(/[！-～]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/　/g,' ')}
+const normSpec=s=>z2h(String(s||'')).toUpperCase().replace(/[\s\-‐－ー_/()（）]/g,'');
+function itemById(id){return M.items.find(x=>x.id===id)}
+function secName(id){return (SECTIONS.find(s=>s.id===id)||{}).name||id}
+function fmtYmd(s){if(!s)return'';const [y,m,d]=s.split('-');return `${y}/${m}/${d}`}
+
+/* ================= GS1 parser ================= */
+// 固定長AI（データ部の桁数）
+const FIXED={'00':18,'01':14,'02':14,'11':6,'12':6,'13':6,'15':6,'16':6,'17':6,'20':2};
+// 可変長AI（最大桁）
+const VAR={'10':20,'21':20,'22':20,'240':30,'241':30,'30':8,'37':8,'90':30,'91':90,'92':90,'93':90,'94':90,'95':90,'96':90,'97':90,'98':90,'99':90};
+const GS='\x1d';
+function cleanRaw(raw){
+  let s=z2h(String(raw)).replace(/[\r\n]/g,'');
+  s=s.replace(/^\][A-Za-z][0-9]/,'');            // シンボル識別子 ]C1 ]d2 など
+  s=s.replace(/<GS>|\{GS\}|\^\]/gi,GS);          // リーダー設定で文字化けしたFNC1
+  return s.trim();
+}
+function parseAIs(s){
+  // 括弧付き表記 (01)xxx(17)yyy(10)zzz
+  if(/^\(\d{2,4}\)/.test(s)){
+    const out={};const re=/\((\d{2,4})\)([^()]*)/g;let m;
+    while((m=re.exec(s)))out[m[1]]=m[2].replace(/\s+/g,'').replace(GS,'');
+    return Object.keys(out).length?out:null;
+  }
+  s=s.replace(/^\x1d+/,'');
+  const out={};let i=0;
+  while(i<s.length){
+    if(s[i]===GS){i++;continue}
+    let ai=null;
+    for(const len of [2,3,4]){const a=s.substr(i,len);if(a in FIXED||a in VAR){ai=a;break}}
+    if(!ai){
+      // 4桁AI 310x〜369x（重量など）は6桁固定
+      const a4=s.substr(i,4);if(/^3[1-6]\d\d$/.test(a4)){ai=a4;FIXED[a4]=6}
+      else if(/^7003$/.test(a4)){ai=a4;FIXED[a4]=10}
+    }
+    if(!ai)return null;
+    i+=ai.length;
+    if(ai in FIXED){
+      const v=s.substr(i,FIXED[ai]);if(v.length<FIXED[ai]||!/^\d+$/.test(v))return null;
+      out[ai]=v;i+=FIXED[ai];
+    }else{
+      let j=s.indexOf(GS,i);if(j<0)j=s.length;
+      const v=s.substring(i,Math.min(j,i+VAR[ai]));if(!v)return null;
+      out[ai]=v;i+=v.length;
+    }
+  }
+  return Object.keys(out).length?out:null;
+}
+function yymmdd(v){
+  if(!v||v.length!==6)return null;
+  const y=2000+ +v.slice(0,2),m=+v.slice(2,4);let d=+v.slice(4,6);
+  if(m<1||m>12)return null;
+  if(d===0)d=new Date(y,m,0).getDate();          // DD=00 は月末
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function gtinCheck(g){let s=0;for(let i=0;i<13;i++)s+=(+g[i])*(i%2===0?3:1);return (10-s%10)%10===+g[13]}
+/* 読んだ文字列を {gtin, lot, exp, kind} に */
+function interpret(raw){
+  const s=cleanRaw(raw);
+  if(!s)return null;
+  const digitsOnly=/^\d+$/.test(s);
+  if(digitsOnly&&s.length===13)return {kind:'gtin',gtin:'0'+s,raw:s};          // JAN
+  if(digitsOnly&&s.length===14&&gtinCheck(s))return {kind:'gtin',gtin:s,raw:s}; // GTIN-14単体
+  const ai=parseAIs(s);
+  if(ai&&(ai['01']||ai['10']||ai['17'])){
+    return {kind:'gs1',gtin:ai['01']||null,lot:ai['10']||null,exp:yymmdd(ai['17']),sn:ai['21']||null,raw:s,ai};
+  }
+  // 規格の手入力
+  const n=normSpec(s);
+  const hit=M.items.filter(x=>x.spec&&normSpec(x.spec)===n);
+  if(hit.length===1)return {kind:'spec',item:hit[0],raw:s};
+  return {kind:'unknown',raw:s};
+}
+
+/* ================= scanning ================= */
+const scanIn=$('#scanIn'),scanBox=$('#scanBox');
+let modalOpen=false;
+function setReady(){const r=document.activeElement===scanIn;scanBox.classList.toggle('ready',r);
+  $('#scanSt').textContent=r?'スキャン待機中 — バーコードを読んでください':'クリックするとスキャン待機になります';}
+scanIn.addEventListener('focus',setReady);scanIn.addEventListener('blur',setReady);
+scanBox.addEventListener('click',e=>{if(!e.target.closest('select,button'))scanIn.focus()});
+scanIn.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const v=scanIn.value;scanIn.value='';if(v.trim())handleScan(v)}
+});
+// 入力欄以外にフォーカスがあってもリーダーの入力を拾う
+let kbuf='',kt=0;
+document.addEventListener('keydown',e=>{
+  if(modalOpen)return;
+  const t=e.target;if(t===scanIn||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable)return;
+  if(!$('#pgInput').classList.contains('on'))return;
+  const now=Date.now();if(now-kt>80)kbuf='';kt=now;
+  if(e.key==='Enter'){if(kbuf.length>=8){e.preventDefault();const v=kbuf;kbuf='';handleScan(v)}kbuf='';return}
+  if(e.key.length===1)kbuf+=e.key;
+});
+
+let lastEntryId=null;
+function addEntries(itemId,lot,exp,qty,src,raw){
+  const ids=[];
+  for(let k=0;k<(qty||1);k++){
+    const en={id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),item:itemId,lot:lot||'',exp:exp||'',src,raw:raw||'',at:Date.now()};
+    C.entries.push(en);ids.push(en.id);
+  }
+  lastEntryId=ids[ids.length-1];
+  saveCase();render();flashRow(itemId);
+  return ids;
+}
+function expWarn(exp){return exp&&C.date&&exp<C.date}
+function handleScan(raw){
+  const r=interpret(raw);
+  if(!r)return;
+  if(r.kind==='unknown'){beep('ng');toast('ng',`<b>読み取れませんでした</b><br>「${esc(r.raw)}」<br>GS1バーコードでも登録済みの規格でもありません。入力欄に全角文字が入っていないか確認してください。`);return}
+  if(r.kind==='spec'){
+    beep('ok');const ids=addEntries(r.item.id,'','',1,'spec',r.raw);
+    toast('warn',`<b>${esc(r.item.name)}</b> を1本追加（規格の手入力）<br>製造番号が空です。ロットのバーコードを続けて読むか、左の記録で入力してください。`,ids);return;
+  }
+  // ロット／期限だけのバーコード（GTINが別バーコードのラベル）
+  if(!r.gtin){
+    const last=C.entries.find(e=>e.id===lastEntryId);
+    if(last&&!last.lot){
+      last.lot=r.lot||'';if(r.exp)last.exp=r.exp;saveCase();render();flashRow(last.item);
+      const it=itemById(last.item);
+      const w=expWarn(last.exp);beep(w?'ng':'ok');
+      toast(w?'ng':'ok',`<b>${esc(it?it.name:'')}</b> に製造番号 <b>${esc(last.lot)}</b> を入れました`+(last.exp?`（期限 ${fmtYmd(last.exp)}）`:'')+(w?'<br><b>⚠ 使用期限切れです</b>':''));
+    }else{
+      beep('ng');toast('ng','<b>ロット／期限だけのバーコードです</b><br>先に同じラベルの商品コード（(01)で始まる方）を読んでください。');
+    }
+    return;
+  }
+  const it=M.items.find(x=>x.gtins.includes(r.gtin));
+  if(!it){beep('ask');openUnknown(r);return}
+  commitScan(it,r);
+}
+function commitScan(it,r){
+  const dup=C.entries.length&&(()=>{const l=C.entries[C.entries.length-1];return l.item===it.id&&l.lot===(r.lot||'')&&Date.now()-l.at<4000&&r.lot})();
+  const ids=addEntries(it.id,r.lot,r.exp,1,'scan',r.raw);
+  const w=expWarn(r.exp);
+  beep(w?'ng':'ok');
+  const n=C.entries.filter(e=>e.item===it.id).length;
+  let msg=`<b>${esc(it.name)}</b>　${esc(it.spec)}<br>製造番号 <b>${esc(r.lot||'（未入力）')}</b>`+(r.exp?`　期限 ${fmtYmd(r.exp)}`:'')+`　→ 使用数 ${n}`;
+  if(w)msg+='<br><b>⚠ 使用期限が手術日より前です。現物を確認してください。</b>';
+  if(!r.lot)msg+='<br>製造番号が入っていないバーコードです。ロットのバーコードを続けて読んでください。';
+  if(dup)msg+='<br>直前と同じバーコードです。2本使っていなければ［取り消す］。';
+  toast(w?'ng':(!r.lot||dup)?'warn':'ok',msg,ids);
+}
+
+/* ================= unknown modal ================= */
+let pending=null;
+function openUnknown(r){
+  pending=r;modalOpen=true;
+  $('#uCode').innerHTML=`GTIN <b>${esc(r.gtin)}</b>`+(r.lot?`　製造番号 ${esc(r.lot)}`:'')+(r.exp?`　期限 ${fmtYmd(r.exp)}`:'');
+  $('#uSearch').value='';$('#uNewBox').open=false;
+  $('#nName').value=$('#nSpec').value=$('#nMk').value='';
+  $('#nSec').innerHTML=SECTIONS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  drawPick();$('#mUnknown').classList.add('on');setTimeout(()=>$('#uSearch').focus(),30);
+}
+function drawPick(){
+  const q=normSpec($('#uSearch').value);
+  let h='';
+  for(const s of SECTIONS){
+    const list=M.items.filter(x=>x.sec===s.id&&x.name&&(!q||normSpec(x.name+x.spec+x.maker).includes(q)));
+    if(!list.length)continue;
+    h+=`<li class="secname">${esc(s.name)}</li>`;
+    h+=list.map(x=>`<li data-id="${x.id}"><span>${esc(x.name)}</span><small>${esc(x.spec)}　${esc(x.maker)}${x.gtins.length?'　(登録済GTIN '+x.gtins.length+')':''}</small></li>`).join('');
+  }
+  $('#uList').innerHTML=h||'<li class="secname">該当なし — 下の「新しく登録する」を使ってください</li>';
+}
+$('#uSearch').addEventListener('input',drawPick);
+$('#uSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('#uList li[data-id]');if(f)f.click()}});
+$('#uList').addEventListener('click',async e=>{
+  const li=e.target.closest('li[data-id]');if(!li||busy)return;
+  const r=pending;
+  if(SERVER){
+    // 他のPCの学習と混ざっても消えないよう、1件ずつサーバーへ
+    busy=true;
+    try{
+      const res=await gs('learnGtin',{itemId:li.dataset.id,gtin:r.gtin});
+      setMaster(res.master);
+      if(res.clash){alert(`このバーコードは他のPCで「${res.clash}」に登録されました。そちらで入力します。`)}
+    }catch(err){busy=false;alert('登録できませんでした：'+err.message);return}
+    busy=false;
+    closeUnknown();pending=null;
+    const it=M.items.find(x=>x.gtins.includes(r.gtin));if(it)commitScan(it,r);
+    return;
+  }
+  const it=itemById(li.dataset.id);
+  if(!it.gtins.includes(r.gtin))it.gtins.push(r.gtin);
+  saveMaster();closeUnknown();commitScan(it,r);pending=null;drawMaster();
+});
+let busy=false;
+$('#nAdd').addEventListener('click',async()=>{
+  const name=$('#nName').value.trim();if(!name){$('#nName').focus();return}
+  if(busy)return;
+  const r=pending,p={sec:$('#nSec').value,name,spec:$('#nSpec').value.trim(),maker:$('#nMk').value.trim()};
+  if(SERVER){
+    busy=true;
+    try{const res=await gs('addItem',Object.assign({gtin:r.gtin},p));setMaster(res.master);busy=false;closeUnknown();pending=null;commitScan(itemById(res.id),r)}
+    catch(err){busy=false;alert('登録できませんでした：'+err.message)}
+    return;
+  }
+  const it=Object.assign({id:'u'+(M.nextId++),gtins:[r.gtin]},p);
+  insertItem(it);saveMaster();closeUnknown();commitScan(it,r);pending=null;drawMaster();
+});
+$('#uCancel').addEventListener('click',()=>{closeUnknown();pending=null;toast('warn','今回は入れませんでした。')});
+function closeUnknown(){$('#mUnknown').classList.remove('on');modalOpen=false;scanIn.focus()}
+function insertItem(it){
+  // 同じ区分の空き行があればそこに、無ければ区分の末尾に
+  const blank=M.items.findIndex(x=>x.sec===it.sec&&!x.name);
+  if(blank>=0){M.items.splice(blank,1,it);return}
+  let last=-1;M.items.forEach((x,i)=>{if(x.sec===it.sec)last=i});
+  M.items.splice(last+1,0,it);
+}
+
+/* ================= manual add / remarks ================= */
+let mmItem=null;
+function openManual(itemId){
+  mmItem=itemId;modalOpen=true;const it=itemById(itemId);
+  $('#mmItem').textContent=`${it.name}　${it.spec}`;
+  $('#mmLot').value='';$('#mmExp').value='';$('#mmQty').value=1;
+  $('#mManual').classList.add('on');setTimeout(()=>$('#mmLot').focus(),30);
+}
+$('#mmOk').addEventListener('click',()=>{
+  const q=Math.max(1,Math.min(20,+$('#mmQty').value||1));
+  const ids=addEntries(mmItem,z2h($('#mmLot').value.trim()),$('#mmExp').value,q,'manual');
+  const it=itemById(mmItem);
+  closeManual();toast('ok',`<b>${esc(it.name)}</b> を${q}本追加（手入力）`,ids);
+});
+$('#mmLot').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)$('#mmOk').click()});
+$('#mmCancel').addEventListener('click',closeManual);
+function closeManual(){$('#mManual').classList.remove('on');modalOpen=false;scanIn.focus()}
+let rmItem=null;
+function openRem(itemId){
+  rmItem=itemId;modalOpen=true;const it=itemById(itemId);
+  $('#rmItem').textContent=`${it.name}　${it.spec}`;$('#rmText').value=C.rem[itemId]||'';
+  $('#mRem').classList.add('on');setTimeout(()=>$('#rmText').focus(),30);
+}
+$('#rmOk').addEventListener('click',()=>{const v=$('#rmText').value.trim();if(v)C.rem[rmItem]=v;else delete C.rem[rmItem];saveCase();render();closeRem()});
+$('#rmText').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)$('#rmOk').click()});
+$('#rmCancel').addEventListener('click',closeRem);
+function closeRem(){$('#mRem').classList.remove('on');modalOpen=false;scanIn.focus()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen){
+  if($('#mUnknown').classList.contains('on'))$('#uCancel').click();
+  if($('#mManual').classList.contains('on'))closeManual();
+  if($('#mRem').classList.contains('on'))closeRem();
+  if($('#mMail').classList.contains('on'))closeMail();
+}});
+
+/* ================= toast / sound ================= */
+let toastTimer=null;
+function toast(kind,html,undoIds){
+  const f=$('#flash');
+  f.className='flash on '+kind;
+  f.innerHTML=(undoIds?`<button class="btn sm undo">取り消す</button>`:'')+html;
+  if(undoIds)f.querySelector('.undo').onclick=()=>{C.entries=C.entries.filter(e=>!undoIds.includes(e.id));C.deleted=(C.deleted||[]).concat(undoIds);saveCase();render();f.className='flash on warn';f.innerHTML='取り消しました。';scanIn.focus()};
+}
+/* 読み取り音（PCのスピーカーから）。ブラウザは最初の操作まで音を止めているので、最初のクリック／キー入力で起こしておく */
+let actx=null;
+const VOL={high:.5,mid:.22,low:.08,off:0};
+let soundLv=load('cpbcost_sound','high');if(!(soundLv in VOL))soundLv='high';
+function audio(){
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended')actx.resume();
+  return actx;
+}
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{try{audio()}catch(e){}},{capture:true}));
+function beep(kind){
+  const v=VOL[soundLv];if(!v)return;
+  try{
+    const a=audio();
+    // ok＝ピッ（高い短音）／ask＝ピピッ（初めてのバーコード）／ng＝ブブー（読めない・期限切れ）
+    const seq=kind==='ok'?[[2700,.09]]:kind==='ask'?[[2000,.08],[2700,.08]]:[[400,.16],[300,.28]];
+    let t=a.currentTime+.01;
+    for(const [f,d] of seq){
+      const o=a.createOscillator(),g=a.createGain();
+      o.type='square';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.005);
+      g.gain.setValueAtTime(v,t+d-.01);g.gain.linearRampToValueAtTime(0,t+d);
+      o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.01);t+=d+.05;
+    }
+  }catch(e){}
+}
+$('#sndLv').value=soundLv;
+$('#sndLv').addEventListener('change',e=>{soundLv=e.target.value;save('cpbcost_sound',soundLv);beep('ok');scanIn.focus()});
+$('#sndTest').addEventListener('click',()=>{beep('ok');setTimeout(()=>beep('ask'),400);setTimeout(()=>beep('ng'),900);setTimeout(()=>scanIn.focus(),1400)});
+
+/* ================= render paper ================= */
+function lotsFor(itemId){
+  const es=C.entries.filter(e=>e.item===itemId);
+  const map=new Map();
+  for(const e of es){const k=e.lot||'';map.set(k,(map.get(k)||0)+1)}
+  const parts=[...map].map(([l,n])=>(l||'□□□')+(n>1?'×'+n:''));
+  return {n:es.length,text:parts.join(', ')};
+}
+function render(){
+  // 症例情報
+  $('#cDate').value=C.date||'';$('#cPid').value=C.pid||'';$('#cOp').value=C.op||'';$('#cDept').value=C.dept??M.dept;
+  const [y,m,d]=(C.date||'--').split('-');
+  let h=`<div class="ph"><div class="ttl">榛原総合病院　症例報告書　人工心肺コスト表</div><div class="ver">${esc(M.ver)}</div></div>
+  <table class="cost"><colgroup><col style="width:37%"><col style="width:16%"><col style="width:11.5%"><col style="width:5.5%"><col style="width:14.5%"><col style="width:15.5%"></colgroup>
+  <thead><tr><th>品名</th><th>規格</th><th>メーカー</th><th>使用数</th><th>製造番号</th><th>備考</th></tr></thead><tbody>`;
+  for(const s of SECTIONS){
+    h+=`<tr><td class="sec" colspan="6">${esc(s.name)}</td></tr>`;
+    for(const it of M.items.filter(x=>x.sec===s.id)){
+      if(!it.name){h+=`<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;continue}
+      const L=lotsFor(it.id);const rem=C.rem[it.id]||'';
+      const lc=L.text.length>26?'s2':L.text.length>13?'s1':'';
+      h+=`<tr class="item${L.n?' used':''}" data-id="${it.id}"><td class="nm"><span class="fit">${esc(it.name)}</span></td><td class="sp"><span class="fit">${esc(it.spec)}</span></td><td class="mk"><span class="fit">${esc(it.maker)}</span></td>`+
+         `<td class="qty">${L.n||''}</td><td class="lot ${lc}">${lc==='s2'?esc(L.text):`<span class="fit">${esc(L.text)}</span>`}</td><td class="rem">${esc(rem)}</td></tr>`;
+    }
+  }
+  h+=`</tbody></table>
+  <div class="pf">
+   <div>手術日（ <span class="val">${C.date?esc(y):'　　　'}</span> 年 <span class="val">${C.date?+m:'　'}</span> 月 <span class="val">${C.date?+d:'　'}</span> 日）</div>
+   <div>所属（<span class="val">${esc(C.dept??M.dept)}</span>）</div>
+   <div class="rt">${esc(M.rep)}</div>
+   <div>患者様ID（ <span class="val">${esc(C.pid)}</span> ）</div>
+   <div>術式　<span class="val">${esc(C.op)}</span></div>
+   <div class="rt" style="font-size:12pt;letter-spacing:.06em">${esc(M.fax)}</div>
+  </div>`;
+  $('#paper').innerHTML=h;
+  // 品名が長いものは横に縮める（紙と同じく1行に収める）
+  requestAnimationFrame(()=>{document.querySelectorAll('#paper td .fit').forEach(sp=>{
+    sp.style.transform='';const w=sp.parentElement.clientWidth-8,sw=sp.scrollWidth;if(w>0&&sw>w)sp.style.transform=`scaleX(${(w/sw).toFixed(3)})`;})});
+  drawLog();
+  drawMobCase();
+}
+function flashRow(itemId){requestAnimationFrame(()=>{const tr=document.querySelector(`#paper tr[data-id="${itemId}"]`);if(tr){tr.classList.remove('flashrow');void tr.offsetWidth;tr.classList.add('flashrow')}})}
+$('#paper').addEventListener('click',e=>{
+  const tr=e.target.closest('tr.item');if(!tr)return;
+  if(e.target.closest('td.rem'))openRem(tr.dataset.id);else openManual(tr.dataset.id);
+});
+
+/* ================= log ================= */
+function drawLog(){
+  $('#logCount').textContent=C.entries.length+'件';
+  if(!C.entries.length){$('#log').innerHTML='<li class="empty" style="display:block">まだ何も読んでいません。</li>';return}
+  $('#log').innerHTML=[...C.entries].reverse().map(e=>{
+    const it=itemById(e.item)||{name:'（マスタから削除された品目）',spec:''};
+    const w=expWarn(e.exp);
+    return `<li data-e="${e.id}"><div><div class="nm">${esc(it.name)}</div>
+      <div class="meta">${esc(it.spec)}　Lot ${e.lot?esc(e.lot):'<span class="miss">未入力</span>'}${e.exp?`　期限 <span class="${w?'ng':''}">${fmtYmd(e.exp)}${w?' 期限切れ':''}</span>`:''}${e.src==='manual'?'　<span class="tag">手入力</span>':''}</div></div>
+      <div class="row" style="align-items:start"><button class="btn sm" data-act="lot">ロット</button><button class="btn sm ngb" data-act="del">削除</button></div></li>`;
+  }).join('');
+}
+$('#log').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const id=b.closest('li').dataset.e;
+  const en=C.entries.find(x=>x.id===id);if(!en)return;
+  if(b.dataset.act==='del'){
+    const it=itemById(en.item)||{name:'',spec:''};
+    if(!confirm(`この読み取り記録を削除します。よろしいですか？\n\n${it.name}　${it.spec}\n製造番号 ${en.lot||'（未入力）'}`)){scanIn.focus();return}
+    C.entries=C.entries.filter(x=>x.id!==id);C.deleted=(C.deleted||[]).concat(id);saveCase();render();toast('warn','1本削除しました。');
+  }
+  if(b.dataset.act==='lot'){const v=prompt('製造番号（ロット）',en.lot);if(v!==null){en.lot=z2h(v.trim());saveCase();render()}}
+  scanIn.focus();
+});
+
+/* ================= case fields ================= */
+$('#cDate').addEventListener('change',e=>{C.date=e.target.value;saveCase();render()});
+$('#cPid').addEventListener('input',e=>{C.pid=z2h(e.target.value);saveCase();renderLight()});
+$('#cOp').addEventListener('input',e=>{C.op=e.target.value;saveCase();renderLight()});
+$('#cDept').addEventListener('input',e=>{C.dept=e.target.value;saveCase();renderLight()});
+let rl=null;function renderLight(){clearTimeout(rl);rl=setTimeout(()=>{const a=document.activeElement,id=a&&a.id,ss=a&&a.selectionStart;render();if(id){const el=document.getElementById(id);el.focus();try{el.setSelectionRange(ss,ss)}catch(e){}}},250)}
+function opDatalist(){const ops=[...new Set(H.map(h=>h.op).filter(Boolean))];$('#opList').innerHTML=ops.map(o=>`<option value="${esc(o)}">`).join('')}
+
+$('#bPrint').addEventListener('click',()=>{
+  const miss=C.entries.filter(e=>!e.lot).length;
+  if(miss&&!confirm(`製造番号が未入力のものが${miss}本あります（表では「□□□」）。このまま印刷しますか？`))return;
+  window.print();
+});
+function makeRecord(){
+  if(!C.hid)C.hid=newHid();
+  const rec=JSON.parse(JSON.stringify(C));rec.savedAt=Date.now();rec.status=stOf(C)==='sent'?'sent':(C.status||'draft');
+  if(rec.dept==null)rec.dept=M.dept;
+  // 品目名を一緒に残す（後でマスタを直しても履歴が読めるように）
+  rec.snap={};for(const e of rec.entries){const it=itemById(e.item);if(it)rec.snap[e.item]={name:it.name,spec:it.spec,maker:it.maker}}
+  rec.lines=caseLines(rec).map(x=>`${x.it.spec}×${x.n}(${x.lots})`);
+  return rec;
+}
+/** 履歴に入れて、次の症例に進む。サーバー版は先にスプレッドシートへ保存（already=true なら保存済み） */
+async function archiveCase(rec,already){
+  clearTimeout(saveTimer);saveTimer=null;dirty=false;
+  rec=rec||makeRecord();
+  if(SERVER&&!already){const r=await gs('saveCase',{rec});rec=r.rec||rec}
+  putHist(rec);saveHist();lastSavedAt=0;C=newCase();saveLocalOnly();render();drawHist();opDatalist();
+}
+/** 「保存」：入力中→保存済にして、すぐ保存する（画面はそのまま） */
+async function saveNow(){
+  if(!caseHasContent(C)){toast('warn','まだ何も入力されていません。');return false}
+  if(C.status!=='sent'&&!C.sentAt)C.status='saved';
+  dirty=true;await flushSave();
+  if(saveErr){toast('ng','保存できませんでした：'+esc(saveErr)+'<br>入力内容は画面に残っています。');return false}
+  return true;
+}
+$('#bSaveNow').addEventListener('click',async()=>{
+  if(await saveNow())toast('ok','保存しました。「症例一覧」タブでいつでも見られます。');scanIn.focus();
+});
+$('#bSave').addEventListener('click',async()=>{
+  if(!C.entries.length){toast('warn','まだ何も読んでいないので保存しませんでした。');return}
+  if(!C.pid&&!confirm('患者様IDが空です。このまま保存しますか？'))return;
+  if(!await saveNow())return;
+  lastSavedAt=0;C=newCase();saveLocalOnly();render();opDatalist();
+  toast('ok','保存しました。次の症例を読めます。（保存した症例は「症例一覧」タブにあります）');scanIn.focus();
+});
+
+/* ================= mail ================= */
+const K_MAIL='cpbcost_mail_v1';
+let MS=Object.assign({url:'',token:'',dear:'株式会社アスト　安川様',sign:'榛原総合病院 臨床工学科',pid:true},load(K_MAIL,{}));
+function saveMail(){save(K_MAIL,MS);drawMailState()}
+function mailCfg(){return SERVER?M.mail:MS}
+function drawMailState(){const ok=SERVER||(/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(MS.url)&&MS.token);
+  $('#mailState').textContent=ok?'設定済み':'未設定';$('#mailState').style.background=ok?'var(--okbg)':'var(--warnbg)';return ok}
+function drawMailForm(){const c=mailCfg();$('#mUrl').value=MS.url;$('#mTok').value=MS.token;$('#mDear').value=c.dear;$('#mSign').value=c.sign;$('#mPid').checked=!!c.pid;drawMailState()}
+$('#mUrl').addEventListener('change',e=>{
+  // /u/5/ のようなアカウント番号付きURLは複数ログイン時に開けなくなるので外す
+  MS.url=e.target.value.trim().replace(/\/macros\/u\/\d+\/s\//,'/macros/s/').replace(/\/dev$/,'/exec');e.target.value=MS.url;saveMail()});
+$('#mTok').addEventListener('change',e=>{MS.token=e.target.value.trim();saveMail()});
+$('#mDear').addEventListener('change',e=>{mailCfg().dear=e.target.value;SERVER?saveMaster():saveMail()});
+$('#mSign').addEventListener('change',e=>{mailCfg().sign=e.target.value;SERVER?saveMaster():saveMail()});
+$('#mPid').addEventListener('change',e=>{mailCfg().pid=e.target.checked;SERVER?saveMaster():saveMail()});
+
+async function callGas(payload){
+  if(SERVER){const{action,...rest}=payload;return gs(action==='info'?'mailInfo':action,rest)}
+  if(!drawMailState())throw new Error('送信設定（URL・合言葉）が未設定です。「品目マスタ」タブで設定してください。');
+  let res;
+  try{
+    // text/plain にすると事前確認(preflight)なしで Apps Script に届く
+    res=await fetch(MS.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:MS.token},payload))});
+  }catch(e){throw new Error('Apps Script に繋がりませんでした（ネット接続・URLを確認）')}
+  let j;try{j=await res.json()}catch(e){throw new Error('Apps Script の応答が読めませんでした（デプロイのアクセス権が「全員」になっているか確認）')}
+  if(!j.ok)throw new Error(j.error||'送信に失敗しました');
+  return j;
+}
+
+function caseLines(c){
+  const out=[];
+  for(const s of SECTIONS)for(const it of M.items.filter(x=>x.sec===s.id&&x.name)){
+    const es=c.entries.filter(e=>e.item===it.id);if(!es.length)continue;
+    const map=new Map();for(const e of es)map.set(e.lot||'',(map.get(e.lot||'')||0)+1);
+    out.push({it,n:es.length,lots:[...map].map(([l,n])=>(l||'（未入力）')+(n>1?'×'+n:'')).join(', '),rem:c.rem[it.id]||''});
+  }
+  return out;
+}
+function mailSubject(c){return `【人工心肺コスト表】${fmtYmd(c.date)} 手術分`+(mailCfg().pid&&c.pid?`（ID ${c.pid}）`:'')+'　榛原総合病院'}
+function mailFile(c){return `人工心肺コスト表_${(c.date||'').replace(/-/g,'')}`+(mailCfg().pid&&c.pid?`_${c.pid}`:'')+'.pdf'}
+function mailBody(c){
+  const L=caseLines(c);
+  return `${mailCfg().dear}
+
+いつもお世話になっております。
+${mailCfg().sign}です。
+下記症例の人工心肺コスト表をお送りします（PDFを添付しています）。
+
+手術日：${fmtYmd(c.date)}
+`+(mailCfg().pid?`患者様ID：${c.pid||''}\n`:'')+`術式：${c.op||''}
+所属：${c.dept??M.dept}
+
+■使用物品（${L.reduce((a,x)=>a+x.n,0)}点）
+`+L.map(x=>`・${x.it.name}　${x.it.spec}　数量${x.n}　製造番号 ${x.lots}`+(x.rem?`　備考 ${x.rem}`:'')).join('\n')+`
+
+ご確認のほど、よろしくお願いいたします。
+
+${mailCfg().sign}
+`;
+}
+// Apps Script の PDF 変換は CSS の対応が限られるので、表だけの素朴な HTML を作る
+function pdfHtml(c){
+  const [y,m,d]=(c.date||'--').split('-');
+  let rows='';
+  for(const s of SECTIONS){
+    rows+=`<tr><td colspan="6" style="background:#e4e4e4;text-align:center;font-size:8pt">${esc(s.name)}</td></tr>`;
+    for(const it of M.items.filter(x=>x.sec===s.id)){
+      if(!it.name){rows+='<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>';continue}
+      const es=c.entries.filter(e=>e.item===it.id);const map=new Map();for(const e of es)map.set(e.lot||'',(map.get(e.lot||'')||0)+1);
+      const lots=[...map].map(([l,n])=>(l||'□□□')+(n>1?'×'+n:'')).join(', ');const b=es.length?'font-weight:bold;':'';
+      rows+=`<tr><td style="${b}">${esc(it.name)}</td><td style="${b}">${esc(it.spec)}</td><td style="font-size:7pt">${esc(it.maker)}</td>`+
+        `<td style="text-align:center;font-weight:bold">${es.length||''}</td><td style="font-weight:bold;font-size:${lots.length>14?'6.5':'8'}pt">${esc(lots)}</td><td style="font-size:7pt">${esc(c.rem[it.id]||'')}</td></tr>`;
+    }
+  }
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@page{size:A4;margin:10mm}
+body{font-family:sans-serif;font-size:8.5pt;color:#000}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+td,th{border:1px solid #000;padding:1px 4px;height:16px;font-size:8.5pt;white-space:nowrap;overflow:hidden;font-family:sans-serif}
+th{background:#e4e4e4;font-weight:normal}
+.f td{border:none;border-bottom:1px solid #000;font-size:10pt;padding:6px 4px 1px}
+</style></head><body>
+<table style="border:none"><tr><td style="border:none;font-size:15pt;font-weight:bold;width:78%;height:auto">榛原総合病院　症例報告書　人工心肺コスト表</td><td style="border:none;text-align:right;font-size:7pt;vertical-align:bottom">${esc(M.ver)}</td></tr></table>
+<table><tr><th style="width:37%">品名</th><th style="width:16%">規格</th><th style="width:11%">メーカー</th><th style="width:6%">使用数</th><th style="width:15%">製造番号</th><th style="width:15%">備考</th></tr>${rows}</table>
+<br><table class="f" style="border:none"><tr><td style="width:36%">手術日（ ${c.date?esc(y):''} 年 ${c.date?+m:''} 月 ${c.date?+d:''} 日）</td><td style="width:30%">所属（${esc(c.dept??M.dept)}）</td><td style="font-weight:bold">${esc(M.rep)}</td></tr>
+<tr><td>患者様ID（ ${mailCfg().pid?esc(c.pid):''} ）</td><td>術式　${esc(c.op)}</td><td style="font-weight:bold;font-size:12pt">${esc(M.fax)}</td></tr></table>
+</body></html>`;
+}
+
+let mailCtx=null;
+$('#bMail').addEventListener('click',()=>{
+  if(!drawMailState()){toast('warn','メール送信の設定がまだです。「品目マスタ」タブの「メール送信の設定」で URL と合言葉を入れてください。');return}
+  if(!C.entries.length){toast('warn','まだ何も読んでいません。');return}
+  const warn=[];
+  const miss=C.entries.filter(e=>!e.lot).length;if(miss)warn.push(`製造番号が未入力のものが${miss}本あります。`);
+  const ex=C.entries.filter(e=>expWarn(e.exp)).length;if(ex)warn.push(`使用期限切れのものが${ex}本あります。`);
+  if(!C.pid)warn.push('患者様IDが空です。');
+  if(!C.op)warn.push('術式が空です。');
+  if(C.sentAt)warn.push(`この症例は ${new Date(C.sentAt).toLocaleString('ja-JP')} に送信済みです。送ると<b>再送</b>になります。`);
+  $('#mmWarn').innerHTML=warn.join('<br>');$('#mmWarn').classList.toggle('on',warn.length>0);
+  $('#mmSub').textContent=mailSubject(C);$('#mmFile').textContent=mailFile(C);$('#mmBody').value=mailBody(C);
+  $('#mmTo').textContent='（確認中…）';$('#mmSend').disabled=false;$('#mmSend').textContent='送信する';
+  mailCtx={resend:!!C.sentAt};
+  modalOpen=true;$('#mMail').classList.add('on');
+  callGas({action:'info'}).then(j=>{$('#mmTo').textContent=(j.to||'★宛先が未設定（Apps Script の CONFIG.TO）')+(j.cc?`（CC ${j.cc}）`:'')+`　送信元 ${j.from}`;if(!j.to)$('#mmSend').disabled=true})
+    .catch(err=>{$('#mmTo').textContent='確認できませんでした：'+err.message;$('#mmSend').disabled=true});
+});
+$('#mmCancel2').addEventListener('click',closeMail);
+function closeMail(){$('#mMail').classList.remove('on');modalOpen=false;scanIn.focus()}
+$('#mmSend').addEventListener('click',async()=>{
+  const b=$('#mmSend');if(b.disabled)return;b.disabled=true;b.textContent='送信中…';
+  if(!C.cid)C.cid='c'+Date.now().toString(36);
+  const sendKey=C.cid+(mailCtx&&mailCtx.resend?'_r'+Date.now():'');
+  try{
+    clearTimeout(saveTimer);saveTimer=null;dirty=false;await saveSeq;
+    const rec=makeRecord();rec.status='sent';
+    const j=await callGas({action:'send',sendKey,rec,subject:mailSubject(C),body:$('#mmBody').value,html:pdfHtml(C),filename:mailFile(C)});
+    if(SERVER&&j.rec){closeMail();await archiveCase(j.rec,true)}
+    else{rec.sentAt=Date.now();rec.sentTo=j.to;closeMail();await archiveCase(rec,j.dup&&SERVER)}
+    showPage('pgInput');
+    toast('ok',`<b>送信しました</b>（宛先 ${esc(j.to)}）`+(j.dup?'<br>※直前に同じ症例を送信済みだったので、二重には送っていません。':'')+'<br>症例一覧に保存し、次の症例を読める状態にしました。');
+    beep('ok');
+  }catch(err){
+    b.disabled=false;b.textContent='もう一度送信する';
+    $('#mmWarn').innerHTML='<b>送信できませんでした</b>：'+esc(err.message)+'<br>入力内容は残っています。うまくいかないときは印刷してFAXしてください。';$('#mmWarn').classList.add('on');
+    beep('ng');
+  }
+});
+$('#mInfo').addEventListener('click',async()=>{
+  $('#mMsg').textContent='確認中…';
+  try{const j=await callGas({action:'info'});$('#mMsg').innerHTML=`<span style="color:var(--ok)">繋がりました。</span> 送信元 ${esc(j.from)} ／ 宛先 ${esc(j.to||'★未設定')}${j.cc?' ／ CC '+esc(j.cc):''} ／ 今日あと${j.quota}通`}
+  catch(err){$('#mMsg').innerHTML=`<span style="color:var(--ng)">${esc(err.message)}</span>`}
+});
+$('#mTest').addEventListener('click',async()=>{
+  $('#mMsg').textContent='テスト送信中…';
+  const c=C.entries.length?C:{date:todayStr(),pid:'0000000',op:'テスト',dept:null,rem:{},entries:[{item:(M.items.find(x=>x.name)||{}).id,lot:'TEST01',exp:''}]};
+  try{const j=await callGas({action:'send',test:true,subject:mailSubject(c),body:mailBody(c),html:pdfHtml(c),filename:mailFile(c)});
+    $('#mMsg').innerHTML=`<span style="color:var(--ok)">${esc(j.to)} に送りました。</span>Gmail で添付PDFの見た目を確認してください。`}
+  catch(err){$('#mMsg').innerHTML=`<span style="color:var(--ng)">${esc(err.message)}</span>`}
+});
+$('#bClear').addEventListener('click',async()=>{
+  if(stOf(C)!=='draft'){
+    if(dirty&&!await saveNow())return;
+    lastSavedAt=0;C=newCase();saveLocalOnly();render();toast('ok','閉じました。症例は「症例一覧」に残っています。');scanIn.focus();return;
+  }
+  if(!confirm('この入力中の症例（読み取り記録・症例情報）を消しますか？\n症例一覧からも削除されます。'))return;
+  clearTimeout(saveTimer);saveTimer=null;dirty=false;await saveSeq;
+  const hid=C.hid;
+  try{if(SERVER&&H.some(x=>x.hid===hid))await gs('deleteCase',{hid})}catch(err){toast('ng','削除できませんでした：'+esc(err.message));return}
+  H=H.filter(x=>x.hid!==hid);saveHist();drawHist();
+  lastSavedAt=0;saveErr='';C=newCase();saveLocalOnly();render();toast('warn','消去しました。');scanIn.focus();
+});
+
+/* ================= history ================= */
+const fmtDT=t=>t?new Date(t).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+function itemOf(h,id){return itemById(id)||(h.snap&&h.snap[id])||{name:'（削除された品目）',spec:''}}
+function histLines(h){
+  const map=new Map();
+  for(const e of h.entries){const k=e.item;if(!map.has(k))map.set(k,[]);map.get(k).push(e)}
+  return [...map].map(([id,es])=>{const it=itemOf(h,id);const lm=new Map();for(const e of es)lm.set(e.lot||'（未入力）',(lm.get(e.lot||'（未入力）')||0)+1);
+    return {it,n:es.length,lots:[...lm].map(([l,n])=>l+(n>1?'×'+n:'')).join(', '),exp:[...new Set(es.map(e=>e.exp).filter(Boolean))].map(fmtYmd).join(', '),rem:(h.rem||{})[id]||''}});
+}
+function histRange(){
+  const v=$('#hPeriod').value,d=new Date(),y=d.getFullYear(),m=d.getMonth();
+  const ymd=(Y,M,D)=>{const x=new Date(Y,M,D);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+  if(v==='m0')return [ymd(y,m,1),ymd(y,m+1,0)];
+  if(v==='m1')return [ymd(y,m-1,1),ymd(y,m,0)];
+  if(v==='y0')return [y+'-01-01',y+'-12-31'];
+  if(v==='custom')return [$('#hFrom').value||'0000',$('#hTo').value||'9999'];
+  return ['0000','9999'];
+}
+function histFiltered(){
+  const [a,b]=histRange(),st=$('#hSt').value,q=normSpec($('#hQ').value);
+  return H.filter(h=>{
+    if((h.date||'')<a||(h.date||'')>b)return false;
+    if(st&&stOf(h)!==st)return false;
+    if(q){const hay=normSpec([h.pid,h.op,...h.entries.map(e=>{const it=itemOf(h,e.item);return it.name+it.spec+(e.lot||'')})].join(' '));if(!hay.includes(q))return false}
+    return true;
+  }).sort((x,y)=>(y.date||'').localeCompare(x.date||'')||(y.savedAt||0)-(x.savedAt||0));
+}
+const openDet=new Set();
+function drawHist(){
+  if(!document.getElementById('hPeriod'))return;
+  $('#hRange').style.display=$('#hPeriod').value==='custom'?'':'none';
+  const L=histFiltered();
+  $('#histCount').textContent=H.length+'件';
+  const cnt={draft:0,saved:0,sent:0};let pcs=0;for(const h of L){cnt[stOf(h)]++;pcs+=h.entries.length}
+  $('#hSum').innerHTML=`表示 <b>${L.length}</b> 件・物品 <b>${pcs}</b> 点　（送信済 ${cnt.sent}／保存済 ${cnt.saved}／入力中 ${cnt.draft}）`;
+  if(!L.length){$('#histBody').innerHTML=`<tr><td colspan="6" class="empty">${H.length?'条件に合う症例がありません。':'まだありません。'}</td></tr>`;return}
+  const lab={draft:'入力中',saved:'保存済',sent:'送信済'};
+  $('#histBody').innerHTML=L.map(h=>{
+    const s=stOf(h),ls=histLines(h);
+    const short=ls.slice(0,3).map(x=>esc(x.it.spec||x.it.name)+(x.n>1?'×'+x.n:'')).join('、')+(ls.length>3?` ほか${ls.length-3}品目`:'');
+    const cur=h.hid===C.hid?' <span class="tag">入力画面で開いています</span>':'';
+    let r=`<tr data-h="${h.hid}" class="hrow" style="cursor:pointer"><td>${fmtYmd(h.date)}</td><td>${esc(h.pid)}</td><td>${esc(h.op)}</td>
+      <td style="font-size:12.5px">${h.entries.length}点　<span style="color:var(--sub)">${short}</span>${cur}</td>
+      <td><span class="stb ${s}">${lab[s]}</span> <span style="font-size:11px;color:var(--sub)">${s==='sent'?fmtDT(h.sentAt):fmtDT(h.savedAt)}</span></td>
+      <td><div class="row" style="gap:4px"><button class="btn sm" data-act="open">開く</button><button class="btn sm ngb" data-act="del">削除</button></div></td></tr>`;
+    if(openDet.has(h.hid)){
+      r+=`<tr class="det"><td colspan="6"><ul>${ls.map(x=>`<li><b>${esc(x.it.name)}</b>　${esc(x.it.spec)}　数量${x.n}　製造番号 <b>${esc(x.lots)}</b>${x.exp?'　期限 '+x.exp:''}${x.rem?'　備考 '+esc(x.rem):''}</li>`).join('')}</ul>
+        <div style="color:var(--sub)">所属 ${esc(h.dept||'')}　／　最終保存 ${fmtDT(h.savedAt)}${h.sentAt?`　／　送信 ${fmtDT(h.sentAt)}（${esc(h.sentTo||'')}）`:''}</div></td></tr>`;
+    }
+    return r;
+  }).join('');
+}
+['#hPeriod','#hSt','#hFrom','#hTo'].forEach(s=>$(s).addEventListener('change',drawHist));
+$('#hQ').addEventListener('input',drawHist);
+$('#bHistReload').addEventListener('click',()=>{if(SERVER)gs('hist').then(r=>{H=r.hist;drawHist();toast('ok','最新の一覧にしました。')}).catch(err=>toast('ng',esc(err.message)));else drawHist()});
+$('#histBody').addEventListener('click',async e=>{
+  const tr=e.target.closest('tr.hrow');if(!tr)return;const hid=tr.dataset.h;const h=H.find(x=>x.hid===hid);if(!h)return;
+  const b=e.target.closest('button');
+  if(!b){openDet.has(hid)?openDet.delete(hid):openDet.add(hid);drawHist();return}
+  if(b.dataset.act==='del'){if(hid===C.hid){alert('入力画面で開いている症例です。入力画面の「この症例を消す」を使ってください。');return}
+    if(confirm(`${fmtYmd(h.date)} ${h.pid} の症例を削除しますか？`+(stOf(h)==='sent'?'\n（送信済みの記録です）':'')+(SERVER?'\n（全PC共通の履歴から消えます）':''))){
+    (SERVER?gs('deleteCase',{hid}):Promise.resolve()).then(()=>{H=H.filter(x=>x.hid!==hid);saveHist();drawHist()}).catch(err=>alert('削除できませんでした：'+err.message))}}
+  if(b.dataset.act==='open'){
+    // いま開いている症例は先に保存してから切り替える（消えない）
+    if(dirty&&caseHasContent(C)){await flushSave();if(saveErr){alert('いま開いている症例を保存できなかったので、切り替えを中止しました：'+saveErr);return}}
+    C=JSON.parse(JSON.stringify(h));delete C.savedAt;delete C.snap;delete C.lines;lastSavedAt=h.savedAt||0;saveLocalOnly();render();showPage('pgInput');
+    toast('ok',`${fmtYmd(h.date)} ${esc(h.pid)} の症例を開きました。直すと自動で保存されます。`);
+  }
+});
+$('#bHistCsv').addEventListener('click',()=>{
+  const rows=[['手術日','患者様ID','術式','所属','状態','区分','品名','規格','メーカー','製造番号','使用期限','入力方法']];
+  for(const h of histFiltered())for(const e of h.entries){
+    const it=itemById(e.item)||(h.snap&&h.snap[e.item])||{};const sec=(itemById(e.item)||{}).sec;
+    rows.push([h.date,h.pid,h.op,h.dept??M.dept,{draft:'入力中',saved:'保存済',sent:'送信済'}[stOf(h)],sec?secName(sec):'',it.name||'',it.spec||'',it.maker||'',e.lot,e.exp,{scan:'バーコード',manual:'手入力',spec:'規格入力'}[e.src]||e.src]);
+  }
+  const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  download(`人工心肺コスト_履歴_${todayStr()}.csv`,csv,'text/csv');
+});
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+
+/* ================= master ================= */
+function drawMaster(){
+  $('#sVer').value=M.ver;$('#sRep').value=M.rep;$('#sFax').value=M.fax;
+  let h='';
+  for(const s of SECTIONS){
+    h+=`<tr class="sect"><td colspan="4">${esc(s.name)}</td><td><div class="row"><button class="btn sm" data-add="${s.id}">＋品目</button><button class="btn sm" data-blank="${s.id}">＋空き行</button></div></td></tr>`;
+    for(const it of M.items.filter(x=>x.sec===s.id)){
+      h+=`<tr data-id="${it.id}" class="${it.name?'':'blank'}"><td><input data-f="name" value="${esc(it.name)}" placeholder="（空き行）"></td><td><input data-f="spec" value="${esc(it.spec)}"></td><td><input data-f="maker" value="${esc(it.maker)}"></td>
+       <td><input data-f="gtins" value="${esc(it.gtins.join(', '))}" placeholder="未登録（初回スキャン時に覚えます）" style="font-family:Consolas,monospace;font-size:12px"></td>
+       <td><div class="row" style="gap:4px"><button class="btn sm" data-mv="-1">↑</button><button class="btn sm" data-mv="1">↓</button><button class="btn sm ngb" data-del="1">削除</button></div></td></tr>`;
+    }
+  }
+  $('#mBody').innerHTML=h;
+}
+$('#mBody').addEventListener('change',e=>{
+  const inp=e.target.closest('input[data-f]');if(!inp)return;const it=itemById(inp.closest('tr').dataset.id);
+  const f=inp.dataset.f;
+  if(f==='gtins'){
+    const list=z2h(inp.value).split(/[,\s、]+/).map(x=>x.replace(/[()]/g,'')).filter(Boolean).map(x=>x.length===13?'0'+x:x);
+    const bad=list.filter(x=>!/^\d{14}$/.test(x));
+    if(bad.length){alert('14桁（JANなら13桁）の数字で入れてください：'+bad.join(', '));inp.value=it.gtins.join(', ');return}
+    const clash=list.map(g=>[g,M.items.find(x=>x!==it&&x.gtins.includes(g))]).filter(x=>x[1]);
+    if(clash.length){alert(`${clash[0][0]} はすでに「${clash[0][1].name}」に登録されています。`);inp.value=it.gtins.join(', ');return}
+    it.gtins=list;inp.value=list.join(', ');
+  }else it[f]=inp.value.trim();
+  saveMaster();render();if(f==='name')drawMaster();
+});
+$('#mBody').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.add||b.dataset.blank){
+    const sec=b.dataset.add||b.dataset.blank;
+    if(SERVER){
+      gs('addItem',{sec,name:b.dataset.add?'新しい品目':'',blank:!!b.dataset.blank}).then(res=>{setMaster(res.master);
+        if(b.dataset.add){const inp=document.querySelector(`#mBody tr[data-id="${res.id}"] input`);if(inp){inp.focus();inp.select()}}})
+        .catch(err=>alert('追加できませんでした：'+err.message));
+      return;
+    }
+    const it={id:'u'+(M.nextId++),sec,name:b.dataset.add?'新しい品目':'',spec:'',maker:'',gtins:[]};
+    let last=-1;M.items.forEach((x,i)=>{if(x.sec===sec)last=i});M.items.splice(last+1,0,it);
+    saveMaster();drawMaster();render();
+    if(b.dataset.add){const inp=document.querySelector(`#mBody tr[data-id="${it.id}"] input`);inp.focus();inp.select()}
+    return;
+  }
+  const tr=b.closest('tr[data-id]');if(!tr)return;const id=tr.dataset.id;const i=M.items.findIndex(x=>x.id===id);const it=M.items[i];
+  if(b.dataset.del){
+    if(C.entries.some(x=>x.item===id)){alert('入力中の症例で使っている品目なので削除できません。');return}
+    if(!confirm(`「${it.name||'空き行'}」を削除しますか？`))return;
+    M.items.splice(i,1);
+  }
+  if(b.dataset.mv){
+    const dir=+b.dataset.mv;let j=i+dir;
+    while(j>=0&&j<M.items.length&&M.items[j].sec!==it.sec)j+=dir;
+    if(j<0||j>=M.items.length)return;
+    [M.items[i],M.items[j]]=[M.items[j],M.items[i]];
+  }
+  saveMaster();drawMaster();render();
+});
+[['#sVer','ver'],['#sRep','rep'],['#sFax','fax']].forEach(([s,k])=>$(s).addEventListener('change',e=>{M[k]=e.target.value;saveMaster();render()}));
+$('#bExport').addEventListener('click',()=>download(`人工心肺コスト表_品目マスタ_${todayStr()}.json`,JSON.stringify({type:'cpbcost-master',v:1,master:M},null,1),'application/json'));
+$('#fImport').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;e.target.value='';
+  try{
+    const j=JSON.parse(await f.text());if(j.type!=='cpbcost-master'||!j.master||!Array.isArray(j.master.items))throw 0;
+    const used=new Set(C.entries.map(x=>x.item));const miss=[...used].filter(id=>!j.master.items.some(x=>x.id===id));
+    if(miss.length&&!confirm('入力中の症例の品目が読み込むマスタにありません。表示が崩れる可能性があります。続けますか？'))return;
+    if(!confirm(`品目 ${j.master.items.filter(x=>x.name).length}件のマスタで置き換えます。よろしいですか？`))return;
+    M=j.master;saveMaster();drawMaster();render();alert('読み込みました。');
+  }catch(err){alert('このファイルは品目マスタではありません。')}
+});
+$('#bReset').addEventListener('click',()=>{
+  if(!confirm('品目マスタを最初の状態に戻します。覚えたバーコードも消えます。よろしいですか？'))return;
+  M=seedMaster();saveMaster();drawMaster();render();
+});
+
+/* ================= tabs ================= */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id===id));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.pg===id));
+  if(id==='pgInput'){render();setTimeout(()=>scanIn.focus(),30)}
+  if(id==='pgHist'){drawHist();if(SERVER)gs('hist').then(r=>{H=r.hist;drawHist()}).catch(()=>{})}
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.pg)));
+
+/* ================= boot ================= */
+/* ================= 携帯で読む ================= */
+var PRM=window.__P||{};
+if(API){const q=new URLSearchParams(location.search);PRM={m:'1',c:String(q.get('c')||'').replace(/[^0-9A-Za-z_]/g,'')}}
+var MOBILE=SERVER&&PRM.m==='1';
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('部品を読み込めませんでした（ネット接続を確認）'));document.head.appendChild(s)})}
+const maskId=s=>{s=String(s||'');return s.length>3?'＊'.repeat(Math.min(4,s.length-3))+s.slice(-3):s};
+function drawMobCase(){
+  if(!MOBILE)return;
+  const n=C.entries.length;
+  $('#mobCaseBox').innerHTML=caseHasContent(C)||H.some(x=>x.hid===C.hid)
+    ?`<div class="card" style="margin:0;padding:10px 12px"><div>手術日 <b>${fmtYmd(C.date)}</b>　ID <b>${esc(maskId(C.pid))||'未入力'}</b></div><div>${esc(C.op||'術式未入力')}　／　読み取り <b>${n}</b> 本</div>
+      <div class="row" style="margin-top:6px"><button class="btn sm" id="mobSwitch">症例を切り替える</button></div></div>`
+    :`<div class="card" style="margin:0;padding:10px 12px">症例がまだ選ばれていません。<div class="row" style="margin-top:6px"><button class="btn pri" id="mobSwitch">症例を選ぶ</button></div></div>`;
+  $('#mobSwitch').onclick=openCasePicker;
+}
+function openCasePicker(){
+  const since=new Date(Date.now()-21*86400000).toISOString().slice(0,10);
+  const L=H.filter(h=>stOf(h)!=='sent'||h.date>=since).filter(h=>(h.date||'')>=since).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.savedAt||0)-(a.savedAt||0));
+  const lab={draft:'入力中',saved:'保存済',sent:'送信済'};
+  $('#csList').innerHTML=L.length?L.map(h=>`<li data-h="${h.hid}"><span class="cs"><b>${fmtYmd(h.date)}</b>　ID ${esc(maskId(h.pid))||'未入力'}　${esc(h.op||'')}<br><small>${h.entries.length}本　<span class="stb ${stOf(h)}">${lab[stOf(h)]}</span></small></span></li>`).join('')
+    :'<li class="secname">最近3週間の症例はありません。「新しい症例を始める」を押してください。</li>';
+  modalOpen=true;$('#mCase').classList.add('on');
+}
+async function switchCase(rec){
+  if(dirty&&caseHasContent(C)){await flushSave();if(saveErr){alert('いまの症例を保存できなかったので、切り替えを中止しました：'+saveErr);return false}}
+  if(rec){C=JSON.parse(JSON.stringify(rec));delete C.savedAt;delete C.snap;delete C.lines;lastSavedAt=rec.savedAt||0}
+  else{C=newCase();lastSavedAt=0}
+  saveLocalOnly();render();return true;
+}
+$('#csList').addEventListener('click',async e=>{const li=e.target.closest('li[data-h]');if(!li)return;const h=H.find(x=>x.hid===li.dataset.h);
+  if(await switchCase(h)){$('#mCase').classList.remove('on');modalOpen=false;toast('ok',`${fmtYmd(h.date)} の症例を開きました。`)}});
+$('#csNew').addEventListener('click',async()=>{if(await switchCase(null)){$('#mCase').classList.remove('on');modalOpen=false;
+  toast('ok','新しい症例です。下の「症例情報」に手術日・術式を入れてから読み取ってください。')}});
+$('#csClose').addEventListener('click',()=>{$('#mCase').classList.remove('on');modalOpen=false});
+
+// --- カメラ（携帯）。Android の Chrome は端末の読み取り機能、それ以外は ZXing で読む
+const ZXING_URL='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+let camStream=null,camLoop=null,camBusy=false,lastCode='',lastCodeAt=0,detector=null,zxReader=null;
+const camCanvas=document.createElement('canvas');
+async function getDecoder(){
+  if('BarcodeDetector' in window&&!detector){
+    try{const fm=await BarcodeDetector.getSupportedFormats();if(fm.includes('code_128'))detector=new BarcodeDetector({formats:['code_128','data_matrix','ean_13','qr_code'].filter(f=>fm.includes(f))})}catch(e){detector=null}
+  }
+  if(!detector&&!zxReader){
+    if(!window.ZXing)await loadScript(ZXING_URL);
+    const hints=new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.DATA_MATRIX,ZXing.BarcodeFormat.EAN_13]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    hints.set(ZXing.DecodeHintType.ASSUME_GS1,true);
+    zxReader=new ZXing.MultiFormatReader();zxReader.setHints(hints);
+  }
+}
+/** canvas の中のバーコードを全部読む（文字列の配列） */
+async function decodeCanvas(cv){
+  if(detector){try{return (await detector.detect(cv)).map(b=>b.rawValue).filter(Boolean)}catch(e){return []}}
+  const ctx=cv.getContext('2d',{willReadFrequently:true});
+  const tryOne=(c)=>{
+    const w=c.width,h=c.height,d=c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,lum=new Uint8ClampedArray(w*h);
+    for(let i=0,j=0;i<lum.length;i++,j+=4)lum[i]=(d[j]*306+d[j+1]*601+d[j+2]*117)>>10;
+    try{const r=zxReader.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.RGBLuminanceSource(lum,w,h))));return r.getText()}catch(e){return null}
+  };
+  let t=tryOne(cv);
+  if(!t){ // 縦向きのラベル用に90度回して試す
+    const r=document.createElement('canvas');r.width=cv.height;r.height=cv.width;const rc=r.getContext('2d');
+    rc.translate(r.width,0);rc.rotate(Math.PI/2);rc.drawImage(cv,0,0);t=tryOne(r);
+  }
+  return t?[t]:[];
+}
+/** 読めた文字列を入力に回す。カメラに写り続けている同じバーコードは数えない（一度外れて1.5秒たてば、もう1本として数える） */
+function feedCodes(codes){
+  // 商品コード（01）を先に、ロットだけのバーコードを後に（ラベルが分かれている場合）
+  codes=[...new Set(codes)].sort((a,b)=>(/^(\]..)?01/.test(cleanRaw(b))?1:0)-(/^(\]..)?01/.test(cleanRaw(a))?1:0));
+  let n=0;
+  for(const c of codes){
+    const now=Date.now();if(c===lastCode&&now-lastCodeAt<1500){lastCodeAt=now;continue}
+    lastCode=c;lastCodeAt=now;n++;
+    try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
+    handleScan(c);
+  }
+  return n;
+}
+async function camStart(){
+  try{audio()}catch(e){}
+  if(MOBILE&&!caseHasContent(C)&&!H.some(x=>x.hid===C.hid)&&!C.date){openCasePicker();return}
+  $('#camMsg').textContent='カメラを起動しています…';
+  try{await getDecoder()}catch(err){$('#camMsg').textContent=err.message;return}
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+  }catch(err){
+    $('#camMsg').innerHTML='<b>この画面ではカメラを直接使えませんでした。</b><br>「📸 写真で読む」を使ってください（バーコードに近づけて撮影）。';return;
+  }
+  const v=$('#camVid');v.srcObject=camStream;v.style.display='block';$('#camAim').style.display='block';
+  $('#camStart').style.display='none';$('#camStop').style.display='';
+  try{const tr=camStream.getVideoTracks()[0];await tr.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}
+  try{await v.play()}catch(e){}
+  $('#camMsg').textContent='バーコードを枠の中に写してください。読めると「ピッ」と鳴ります。';
+  camLoop=setInterval(async()=>{
+    if(camBusy||modalOpen||!v.videoWidth)return;camBusy=true;
+    try{
+      // 枠のあたり（中央の横長）だけを切り出して読む
+      const vw=v.videoWidth,vh=v.videoHeight,cw=Math.round(vw*.9),ch=Math.round(vh*.45);
+      camCanvas.width=cw;camCanvas.height=ch;camCanvas.getContext('2d',{willReadFrequently:true}).drawImage(v,(vw-cw)/2,(vh-ch)/2,cw,ch,0,0,cw,ch);
+      feedCodes(await decodeCanvas(detector?v:camCanvas));
+    }finally{camBusy=false}
+  },detector?250:400);
+}
+function camStop(){
+  clearInterval(camLoop);camLoop=null;
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
+  $('#camVid').style.display='none';$('#camAim').style.display='none';$('#camStart').style.display='';$('#camStop').style.display='none';
+}
+$('#camStart').addEventListener('click',camStart);
+$('#camStop').addEventListener('click',camStop);
+$('#camPhoto').addEventListener('click',()=>{try{audio()}catch(e){};if(MOBILE&&!caseHasContent(C)&&!H.some(x=>x.hid===C.hid)&&!C.date){openCasePicker();return}$('#camFile').click()});
+$('#camFile').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  $('#camMsg').textContent='写真を読み取っています…';
+  try{
+    await getDecoder();
+    const img=await createImageBitmap(f);
+    const s=Math.min(1,2000/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    lastCode='';const n=feedCodes(await decodeCanvas(cv));
+    $('#camMsg').textContent=n?'読み取りました。続けて撮影できます。':'バーコードが見つかりませんでした。バーコード1本が大きく写るように、近づけて撮り直してください。';
+    if(!n)beep('ng');
+  }catch(err){$('#camMsg').textContent='読み取れませんでした：'+err.message}
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&camStream)camStop()});
+
+// --- PC：この症例を携帯で開くQRコード
+var webUrl='';
+$('#bPhone').addEventListener('click',async()=>{
+  try{
+    const wu=await gs('webUrl');webUrl=wu.url;const mob=(wu.mobileUrl||'').trim();
+    // 携帯で開けるよう、空の症例でも先にサーバーへ作っておく
+    clearTimeout(saveTimer);saveTimer=null;dirty=false;await saveSeq;
+    const rec=makeRecord();const r=await gs('saveCase',{rec});putHist(r.rec||rec);lastSavedAt=Date.now();drawSaveSt();
+    if(!window.QRCode)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+    const url=mob?mob+(mob.includes('?')?'&':'?')+'c='+encodeURIComponent(C.hid):webUrl+'?m=1&c='+encodeURIComponent(C.hid);
+    $('#qrBox').innerHTML='';new QRCode($('#qrBox'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+    $('#qrCase').textContent=`${fmtYmd(C.date)}　ID ${maskId(C.pid)||'未入力'}　${C.op||''}`;
+    $('#qrUrl').textContent=mob||webUrl+'?m=1';
+    $('#qrNote').style.display=mob?'none':'';
+    modalOpen=true;$('#mQr').classList.add('on');
+  }catch(err){toast('ng','QRコードを出せませんでした：'+esc(err.message))}
+});
+$('#qrClose').addEventListener('click',()=>{$('#mQr').classList.remove('on');modalOpen=false;scanIn.focus()});
+
+// --- 同じ症例を開いている他の端末の読み取りを、約10秒ごとに取り込む
+setInterval(()=>{
+  if(!SERVER||!PASS||modalOpen||document.hidden||saving||dirty)return;
+  if(!$('#pgInput').classList.contains('on'))return;
+  const known=H.find(x=>x.hid===C.hid);if(!known)return;
+  gs('getCase',{hid:C.hid}).then(r=>{
+    if(!r.rec||r.rec.hid!==C.hid)return;
+    if((r.rec.savedAt||0)===(known.savedAt||0))return;
+    putHist(r.rec);applyRemote(r.rec,false);
+  }).catch(()=>{});
+},10000);
+
+let lastSync=0;
+if(SERVER){
+  document.querySelectorAll('.localonly').forEach(x=>x.style.display='none');
+  document.querySelectorAll('.serveronly').forEach(x=>x.style.display='');
+  if(MOBILE){document.body.classList.add('mobile');document.title='人工心肺コスト表（携帯）';$('header.app h1').textContent='人工心肺コスト表（携帯）'}
+  const tryLogin=async()=>{
+    $('#lgMsg').textContent='読み込み中…';
+    try{
+      const r=await gs(MOBILE?'mobileInit':'init');
+      save('cpbcost_pass',PASS);H=r.hist;setMaster(r.master);drawHist();opDatalist();
+      if(MOBILE){
+        const want=PRM.c&&H.find(x=>x.hid===PRM.c);
+        if(want&&want.hid!==C.hid){await switchCase(want);toast('ok',`${fmtYmd(want.date)} の症例を開きました。「カメラで読む」で読み取れます。`)}
+        else if(!want&&!caseHasContent(C))setTimeout(openCasePicker,300);
+      }
+      // このPCに残っていた入力中の症例がサーバーに無ければ保存しておく
+      if(caseHasContent(C)&&!H.some(x=>x.hid===C.hid)){dirty=true;flushSave()}else drawSaveSt();
+      const nd=H.filter(x=>stOf(x)==='draft'&&x.hid!==C.hid).length;
+      if(nd)toast('warn',`入力中のままの症例が ${nd} 件あります。「症例一覧」タブで確認できます。`);
+      $('#mLogin').classList.remove('on');modalOpen=false;scanIn.focus();setReady();lastSync=Date.now();
+    }catch(err){$('#lgMsg').textContent=err.message;if(err.auth){PASS='';save('cpbcost_pass','')}$('#lgPass').focus()}
+  };
+  $('#lgOk').addEventListener('click',()=>{PASS=$('#lgPass').value;tryLogin()});
+  $('#lgPass').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){PASS=$('#lgPass').value;tryLogin()}});
+  modalOpen=true;$('#mLogin').classList.add('on');
+  if(PASS)tryLogin();else setTimeout(()=>$('#lgPass').focus(),50);
+  // 他のPCで覚えたバーコードを取り込む（画面に戻ってきたとき、1分以上経っていれば）
+  const sync=()=>{if(!PASS||modalOpen||Date.now()-lastSync<60000)return;lastSync=Date.now();
+    gs('master').then(r=>{if(r.master.rev!==M.rev&&!modalOpen)setMaster(r.master)}).catch(()=>{})};
+  window.addEventListener('focus',sync);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
+  setInterval(sync,5*60000);
+  $('#bPass').addEventListener('click',async()=>{
+    const np=$('#newPass').value;if(np.length<6){alert('6文字以上にしてください');return}
+    if(!confirm('全PC共通のパスワードを変更します。他のPCでは次に開いたとき新しいパスワードの入力が必要です。よろしいですか？'))return;
+    try{await gs('changePass',{newPass:np});PASS=np;save('cpbcost_pass',PASS);$('#newPass').value='';alert('変更しました。')}catch(err){alert(err.message)}
+  });
+  $('#sMobUrl').addEventListener('change',e=>{const v=e.target.value.trim();if(v&&!/^https:\/\//.test(v)){alert('https:// で始まるURLを入れてください');e.target.value=M.mobileUrl||'';return}M.mobileUrl=v;saveMaster();toast('ok','携帯用ページのURLを登録しました。')});
+  $('#bSheet').addEventListener('click',async()=>{try{const r=await gs('sheetUrl');window.open(r.url,'_blank')}catch(err){alert(err.message)}});
+}
+if(!C.hid){C.hid=newHid();C.status=C.status||'draft';save(K_CASE,C)}
+render();drawHist();drawMaster();drawMailForm();opDatalist();drawSaveSt();
+if(!SERVER){scanIn.focus();setReady();if(caseHasContent(C)&&!H.some(x=>x.hid===C.hid)){dirty=true;flushSave()}}
+window.addEventListener('resize',()=>render());
+</script>
+</body>
+</html>
