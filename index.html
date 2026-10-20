@@ -122,6 +122,8 @@ body.mobile .scan .hint{display:none}
 .bigbtn{font-size:17px;padding:14px 12px;border-radius:12px;width:100%;font-weight:700}
 #camVid{width:100%;max-height:52vh;object-fit:cover;border-radius:10px;background:#000;display:none;margin-top:8px}
 .camwrap{position:relative}
+.camhit{position:absolute;left:6%;right:6%;top:8%;padding:10px 12px;border-radius:12px;font-size:17px;font-weight:700;line-height:1.4;color:#fff;text-align:center;display:none;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.camhit.ok{background:rgba(21,128,61,.92)}.camhit.warn{background:rgba(180,83,9,.94)}.camhit.ng{background:rgba(185,28,28,.94)}
 .camwrap .aim{position:absolute;left:8%;right:8%;top:38%;height:24%;border:3px solid rgba(255,255,255,.85);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.25);pointer-events:none;display:none}
 #mobCaseBox{font-size:14px;line-height:1.7}
 #mobCaseBox b{font-size:16px}
@@ -171,7 +173,7 @@ table.m tr.det ul{margin:4px 0;padding-left:18px}
     <div class="mobonly" id="mobCaseBox" style="margin-bottom:10px"></div>
     <div class="mobonly" style="margin-bottom:10px">
      <button class="btn pri bigbtn" id="camStart">📷 カメラで読む</button>
-     <div class="camwrap"><video id="camVid" playsinline muted autoplay></video><div class="aim" id="camAim"></div></div>
+     <div class="camwrap"><video id="camVid" playsinline muted autoplay></video><div class="aim" id="camAim"></div><div class="camhit" id="camHit"></div></div>
      <div class="row" style="margin-top:8px">
       <button class="btn" id="camStop" style="display:none;flex:1">カメラを止める</button>
       <button class="btn" id="camPhoto" style="flex:1">📸 写真で読む</button>
@@ -837,7 +839,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen){
 
 /* ================= toast / sound ================= */
 let toastTimer=null;
+let hitTimer=null;
 function toast(kind,html,undoIds){
+  // 携帯でカメラ使用中は、結果を映像の上に大きく出す（振動・音が無くても分かるように）
+  let camOn=false;try{camOn=!!camStream}catch(e){}
+  if(camOn){
+    const h=document.getElementById('camHit');
+    if(h){const tmp=document.createElement('div');tmp.innerHTML=html;const first=(tmp.querySelector('b')||tmp).textContent.trim();
+      h.className='camhit '+kind;h.textContent=(kind==='ok'?'✓ ':kind==='ng'?'✕ ':'！ ')+first.slice(0,40);h.style.display='block';
+      clearTimeout(hitTimer);hitTimer=setTimeout(()=>{h.style.display='none'},kind==='ok'?1500:3000)}
+  }
   const f=$('#flash');
   f.className='flash on '+kind;
   f.innerHTML=(undoIds?`<button class="btn sm undo">取り消す</button>`:'')+html;
@@ -853,12 +864,47 @@ function audio(){
   return actx;
 }
 ['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{try{audio()}catch(e){}},{capture:true}));
+// ok＝ピッ（高い短音）／ask＝ピピッ（初めてのバーコード）／ng＝ブブー（読めない・期限切れ）
+const BEEP_SEQ={ok:[[2700,.09]],ask:[[2000,.08],[2700,.08]],ng:[[400,.16],[300,.28]]};
+/* iPhone：マナーモードだとページの効果音（Web Audio）は消される。音楽と同じ扱いの <audio> で鳴らすとマナーモードでも鳴る。
+   さらに iPhone は「画面を触った瞬間」に一度鳴らした <audio> しか後から鳴らせないので、カメラ開始などのタップで準備しておく */
+const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+const wavUrls={},beepEls={};
+function wavUrl(kind){
+  const key=kind+'_'+soundLv;if(wavUrls[key])return wavUrls[key];
+  const sr=22050,v=Math.min(1,VOL[soundLv]*1.6),seq=BEEP_SEQ[kind],pcm=[];
+  for(const [f,d] of seq){
+    const n=Math.round(sr*d);
+    for(let i=0;i<n;i++){const env=Math.min(1,i/80,(n-i)/80);pcm.push(((Math.floor(i*f*2/sr)%2)?1:-1)*v*env*0.6)}
+    for(let i=0;i<sr*.05;i++)pcm.push(0);
+  }
+  const buf=new ArrayBuffer(44+pcm.length*2),dv=new DataView(buf),ws=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');dv.setUint32(4,36+pcm.length*2,true);ws(8,'WAVE');ws(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);ws(36,'data');dv.setUint32(40,pcm.length*2,true);
+  pcm.forEach((s,i)=>dv.setInt16(44+i*2,Math.max(-1,Math.min(1,s))*32767,true));
+  return wavUrls[key]=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+/** タップの中で呼ぶ：3種類の音を無音で一度再生して、後から鳴らせるようにする */
+function unlockBeeps(){
+  if(!VOL[soundLv])return;
+  for(const k of Object.keys(BEEP_SEQ)){
+    const u=wavUrl(k);if(beepEls[u])continue;
+    const a=new Audio(u);a.preload='auto';a.muted=true;beepEls[u]=a;
+    const pr=a.play();if(pr&&pr.then)pr.then(()=>{a.pause();a.currentTime=0;a.muted=false}).catch(()=>{delete beepEls[u]});else{a.pause();a.muted=false}
+  }
+}
+function useElBeep(){return IOS||(typeof MOBILE!=='undefined'&&MOBILE)}
+if(IOS)document.addEventListener('touchend',()=>{try{unlockBeeps()}catch(e){}},{capture:true});
 function beep(kind){
   const v=VOL[soundLv];if(!v)return;
+  if(useElBeep()){
+    try{const a=beepEls[wavUrl(kind)];if(a){a.muted=false;a.currentTime=0;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{})}else{const b=new Audio(wavUrl(kind));const pr=b.play();if(pr&&pr.catch)pr.catch(()=>{})}}catch(e){}
+    return;
+  }
   try{
     const a=audio();
-    // ok＝ピッ（高い短音）／ask＝ピピッ（初めてのバーコード）／ng＝ブブー（読めない・期限切れ）
-    const seq=kind==='ok'?[[2700,.09]]:kind==='ask'?[[2000,.08],[2700,.08]]:[[400,.16],[300,.28]];
+    const seq=BEEP_SEQ[kind]||BEEP_SEQ.ng;
     let t=a.currentTime+.01;
     for(const [f,d] of seq){
       const o=a.createOscillator(),g=a.createGain();
@@ -870,8 +916,8 @@ function beep(kind){
   }catch(e){}
 }
 $('#sndLv').value=soundLv;
-$('#sndLv').addEventListener('change',e=>{soundLv=e.target.value;save('cpbcost_sound',soundLv);beep('ok');scanIn.focus()});
-$('#sndTest').addEventListener('click',()=>{beep('ok');setTimeout(()=>beep('ask'),400);setTimeout(()=>beep('ng'),900);setTimeout(()=>scanIn.focus(),1400)});
+$('#sndLv').addEventListener('change',e=>{soundLv=e.target.value;save('cpbcost_sound',soundLv);try{unlockBeeps()}catch(x){};beep('ok');scanIn.focus()});
+$('#sndTest').addEventListener('click',()=>{try{unlockBeeps()}catch(x){};beep('ok');setTimeout(()=>beep('ask'),400);setTimeout(()=>beep('ng'),900);setTimeout(()=>scanIn.focus(),1400)});
 
 /* ================= render paper ================= */
 function lotsFor(itemId){
@@ -1395,6 +1441,7 @@ function feedCodes(codes){
 }
 async function camStart(){
   try{audio()}catch(e){}
+  try{unlockBeeps()}catch(e){}
   if(MOBILE&&!caseHasContent(C)&&!H.some(x=>x.hid===C.hid)&&!C.date){openCasePicker();return}
   $('#camMsg').textContent='カメラを起動しています…';
   try{await getDecoder()}catch(err){$('#camMsg').textContent=err.message;return}
@@ -1425,7 +1472,7 @@ function camStop(){
 }
 $('#camStart').addEventListener('click',camStart);
 $('#camStop').addEventListener('click',camStop);
-$('#camPhoto').addEventListener('click',()=>{try{audio()}catch(e){};if(MOBILE&&!caseHasContent(C)&&!H.some(x=>x.hid===C.hid)&&!C.date){openCasePicker();return}$('#camFile').click()});
+$('#camPhoto').addEventListener('click',()=>{try{audio()}catch(e){};try{unlockBeeps()}catch(e){};if(MOBILE&&!caseHasContent(C)&&!H.some(x=>x.hid===C.hid)&&!C.date){openCasePicker();return}$('#camFile').click()});
 $('#camFile').addEventListener('change',async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   $('#camMsg').textContent='写真を読み取っています…';
