@@ -113,6 +113,7 @@ table.m tr.sect td{background:#e8edf4;font-weight:700;color:var(--navy)}
 .help code{background:#f1f5f9;padding:1px 5px;border-radius:4px}
 .mobonly{display:none}
 body.mobile .mobonly{display:block}
+body.owncam #camBlock{display:block}
 body.mobile nav.tabs,body.mobile .paperWrap,body.mobile #bMail,body.mobile #bPrint,body.mobile .pconly{display:none!important}
 body.mobile main{padding:10px}
 body.mobile .grid{display:block}
@@ -171,7 +172,7 @@ table.m tr.det ul{margin:4px 0;padding-left:18px}
   <div class="left noprint">
    <div class="card">
     <div class="mobonly" id="mobCaseBox" style="margin-bottom:10px"></div>
-    <div class="mobonly" style="margin-bottom:10px">
+    <div class="mobonly" id="camBlock" style="margin-bottom:10px">
      <button class="btn pri bigbtn" id="camStart">📷 カメラで読む</button>
      <div class="camwrap"><video id="camVid" playsinline muted autoplay></video><div class="aim" id="camAim"></div><div class="camhit" id="camHit"></div></div>
      <div class="row" style="margin-top:8px">
@@ -410,7 +411,7 @@ table.m tr.det ul{margin:4px 0;padding-left:18px}
   <div style="margin-top:6px">次のURLを携帯で開いてブックマークしてください（症例は携帯の画面で選びます）。</div>
   <div class="code" id="qrUrl" style="margin-top:4px;word-break:break-all;font-family:Consolas,monospace;background:#f1f5f9;border-radius:6px;padding:6px 8px"></div>
  </details>
- <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="qrClose">閉じる</button></div>
+ <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn" id="qrOwnCam" style="display:none">📷 このPCのカメラで読む</button><button class="btn" id="qrClose">閉じる</button></div>
 </div></div>
 
 <!-- 携帯：症例を選ぶ -->
@@ -444,7 +445,7 @@ const SEED=[
  ['circ','キャピオックスカスタムパック（FX25プレコネクト）','CX-XRX58411','テルモ','54987892029214'],
  ['circ','キャピオックスカスタムパック（FX15プレコネクト）','CX-XRY58411','テルモ'],
  ['circ','','',''],
- ['circ','榛原総合病院　インスパイアプレコネ回路','JK-SMKL23502','LivaNova','54987494318600'],
+ ['circ','榛原総合病院　インスパイアプレコネ回路','JK-SMKL23503','LivaNova','54987494318600'],
  ['circ','キャピオックスカスタムパック（心筋保護回路）','CX-BPD58401','テルモ','54987892041698'],
  ['circ','CDIシャントセンサー','CV-510H1','テルモ','04987350157195'],
  ['circ','レボリューションポンプ　フィジオ','050300700J','LivaNova','08033178112475'],
@@ -453,8 +454,8 @@ const SEED=[
  ['circ','ヘモコンセントレーター　血液濃縮器','BHC-110','平和物産','14987458518826,04987458518829'],
  ['circ','ヘモコン用回路','MQ-HE','平和物産'],
  ['circ','脳分離回路','HB-NB','平和物産'],
- ['circ','ウォッシュセット　自己血回収キット','TX/125(04355J)','LivaNova'],
- ['cann','イージーグライド送血カニューレ（7mm・心尖部）','EZS21A','エドワーズ','00690103172096'],
+ ['circ','ウォッシュセット　自己血回収キット','TX/125(04255J)','LivaNova'],
+ ['cann','イージーグライド送血カニューレ（7mm・心尖部用）','EZS21A','エドワーズ','00690103172096'],
  ['cann','イージーグライド送血カニューレ（7mm・上行用）','EZC21A','エドワーズ','00690103174182'],
  ['cann','メラカニューレ（FA送血用）※生体適合性あり','PCKC-A2-16','泉工医科工業'],
  ['cann','メラカニューレ（FA送血用）※生体適合性あり','PCKC-A2-20','泉工医科工業'],
@@ -474,13 +475,13 @@ const SEED=[
  ['cann','','',''],
  ['cann','フレックスメイトベントカニューレ（18Fr.）','VCKN-18','泉工医科工業','04806019615411'],
  ['cann','心腔内フレキシブルサッカー（ドボン）','SUN-18','泉工医科工業','04806019615473'],
- ['pleg','アンテフレックス（12G）','ANKN-12-V-ZA','泉工医科工業','04806019615220'],
- ['pleg','レトロプレジャーカニューレ（14Fr.・32cm・マニュアルインフレート）','RC2014MIBB','エドワーズ','00690103034479'],
+ ['pleg','体外循環用カニューレ（16G・ベント付）','ANKN-12-V-ZA','泉工医科工業','04806019615220'],
+ ['pleg','レトロプレジャーカニューレ（14Fr.・32cm・マニュアル）','RC2014MIBB','エドワーズ','00690103034479'],
 ];
 function seedMaster(){
   return {
     items:SEED.map((r,i)=>({id:'s'+(i+1),sec:r[0],name:r[1],spec:r[2],maker:r[3],gtins:r[4]?r[4].split(','):[]})),
-    ver:'2025/11/16現在Ver.1', rep:'担当:株式会社アスト　赤﨑/安川', fax:'FAX:0493-35-1860', dept:'心臓血管外科', nextId:1, seedRev:2
+    ver:'2026/10/24現在Ver.1', rep:'担当:株式会社アスト　赤﨑/安川', fax:'FAX:0493-35-1860', dept:'心臓血管外科', nextId:1, seedRev:2
   };
 }
 
@@ -1469,6 +1470,7 @@ function camStop(){
   clearInterval(camLoop);camLoop=null;
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
   $('#camVid').style.display='none';$('#camAim').style.display='none';$('#camStart').style.display='';$('#camStop').style.display='none';
+  if(!MOBILE){document.body.classList.remove('owncam');try{scanIn.focus()}catch(e){}}
 }
 $('#camStart').addEventListener('click',camStart);
 $('#camStop').addEventListener('click',camStop);
@@ -1488,9 +1490,24 @@ $('#camFile').addEventListener('change',async e=>{
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&camStream)camStop()});
 
+// --- 「携帯で読む」：iPad などカメラ付きのタッチ端末なら、この画面のままその端末のカメラで読む
+// iPhone・iPad・Android だけ（タッチ画面のPCはQRのまま。PCのカメラは QR の画面から選べる）
+function hasOwnCam(){
+  return !!(API&&(IOS||/Android/i.test(navigator.userAgent))&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+}
+function openOwnCam(){
+  document.body.classList.add('owncam');
+  try{$('#camBlock').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}
+  camStart();
+}
+if(hasOwnCam()){const b=document.getElementById('bPhone');if(b)b.textContent='📷 この端末のカメラで読む'}
 // --- PC：この症例を携帯で開くQRコード
 var webUrl='';
 $('#bPhone').addEventListener('click',async()=>{
+  if(hasOwnCam()){
+    if(document.body.classList.contains('owncam')&&camStream){camStop();return}
+    openOwnCam();return;
+  }
   try{
     const wu=await gs('webUrl');webUrl=wu.url;const mob=(wu.mobileUrl||(API?location.href.split(/[?#]/)[0]:'')).trim();
     // 携帯で開けるよう、空の症例でも先にサーバーへ作っておく
@@ -1503,9 +1520,14 @@ $('#bPhone').addEventListener('click',async()=>{
     $('#qrUrl').textContent=mob||webUrl+'?m=1';
     $('#qrNote').style.display=mob?'none':'';
     modalOpen=true;$('#mQr').classList.add('on');
+    // このPCにカメラがあれば「このPCのカメラで読む」も出す（GitHub版のみ。Googleの画面ではカメラが使えない）
+    $('#qrOwnCam').style.display='none';
+    if(API&&navigator.mediaDevices&&navigator.mediaDevices.enumerateDevices)
+      navigator.mediaDevices.enumerateDevices().then(ds=>{if(ds.some(d=>d.kind==='videoinput'))$('#qrOwnCam').style.display=''}).catch(()=>{});
   }catch(err){toast('ng','QRコードを出せませんでした：'+esc(err.message))}
 });
 $('#qrClose').addEventListener('click',()=>{$('#mQr').classList.remove('on');modalOpen=false;scanIn.focus()});
+$('#qrOwnCam').addEventListener('click',()=>{$('#mQr').classList.remove('on');modalOpen=false;openOwnCam()});
 
 // --- 同じ症例を開いている他の端末の読み取りを、約10秒ごとに取り込む
 setInterval(()=>{
