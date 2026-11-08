@@ -674,8 +674,28 @@ function setReady(){const r=document.activeElement===scanIn;scanBox.classList.to
 scanIn.addEventListener('focus',setReady);scanIn.addEventListener('blur',setReady);
 scanBox.addEventListener('click',e=>{if(!e.target.closest('select,button'))scanIn.focus()});
 scanIn.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const v=scanIn.value;scanIn.value='';if(v.trim())handleScan(v)}
+  if(e.key==='Enter'&&!e.isComposing){e.preventDefault();clearTimeout(autoT);const v=scanIn.value;scanIn.value='';if(v.trim())handleScan(v)}
 });
+/* Enter が来なくても読み取り完了とみなす（WIME などでリーダーの最後に Enter が付かないとき）。
+   一気に入った（リーダー・貼り付け）うえで 0.3秒止まり、バーコードの形として読めるときだけ。人が手で打つ途中では確定しない */
+let autoT=null,inFirst=0,inLast=0,inPaste=false;
+function looksLikeBarcode(v){
+  const r=interpret(v);
+  return !!r&&(r.kind==='gtin'||(r.kind==='gs1'&&(r.gtin||r.lot)));
+}
+scanIn.addEventListener('input',e=>{
+  const now=Date.now();
+  if(!scanIn.value){inFirst=0;inPaste=false;clearTimeout(autoT);return}
+  if(!inFirst||now-inLast>500){inFirst=now;inPaste=false}
+  inLast=now;if(e.inputType==='insertFromPaste')inPaste=true;
+  clearTimeout(autoT);
+  autoT=setTimeout(()=>{
+    const v=scanIn.value;if(!v.trim()||e.isComposing)return;
+    const fast=inPaste||(inLast-inFirst)<=Math.max(120,v.length*35);   // リーダーは1文字数ミリ秒、人は100ミリ秒以上
+    if(fast&&looksLikeBarcode(v)){scanIn.value='';inFirst=0;handleScan(v)}
+  },300);
+});
+scanIn.addEventListener('paste',()=>{inPaste=true});
 // 入力欄以外にフォーカスがあってもリーダーの入力を拾う
 let kbuf='',kt=0;
 document.addEventListener('keydown',e=>{
@@ -685,7 +705,11 @@ document.addEventListener('keydown',e=>{
   const now=Date.now();if(now-kt>80)kbuf='';kt=now;
   if(e.key==='Enter'){if(kbuf.length>=8){e.preventDefault();const v=kbuf;kbuf='';handleScan(v)}kbuf='';return}
   if(e.key.length===1)kbuf+=e.key;
+  // Enter が来ないリーダーでも、一気に入って止まったら読み取り完了とみなす
+  clearTimeout(kbufT);
+  kbufT=setTimeout(()=>{if(kbuf.length>=8&&looksLikeBarcode(kbuf)){const v=kbuf;kbuf='';handleScan(v)}},300);
 });
+let kbufT=null;
 
 let lastEntryId=null;
 function addEntries(itemId,lot,exp,qty,src,raw){
